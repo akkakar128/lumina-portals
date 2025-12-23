@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -11,37 +11,59 @@ import {
   Users,
   Palette,
   Download,
-  ChevronLeft,
-  ChevronRight,
-  Menu
+  Zap,
+  Command,
+  Home,
+  Eye,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import CommandPalette from '@/components/admin/CommandPalette';
+import UserManagementPanel from '@/components/admin/UserManagementPanel';
+import FeatureFlagsPanel from '@/components/admin/FeatureFlagsPanel';
 
-type AdminTab = 'overview' | 'portfolio' | 'profile' | 'users' | 'themes' | 'settings' | 'backup';
+type AdminTab = 'overview' | 'portfolio' | 'profile' | 'users' | 'themes' | 'settings' | 'backup' | 'features';
 
 const AdminDashboard = () => {
   const { user, isMasterAdmin, isPortfolioAdmin, signOut, roles } = useAuth();
   const [activeTab, setActiveTab] = useState<AdminTab>('overview');
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   const handleSignOut = async () => {
     await signOut();
-    toast({ title: 'Signed out', description: 'You have been signed out successfully.' });
+    toast({ title: 'Signed out' });
     navigate('/');
   };
 
-  // Menu items based on role
-  const menuItems = [
-    { id: 'overview' as AdminTab, label: 'Overview', icon: LayoutDashboard, roles: ['master_admin', 'portfolio_admin', 'viewer'] },
-    { id: 'portfolio' as AdminTab, label: 'Portfolio', icon: FolderOpen, roles: ['master_admin', 'portfolio_admin'] },
-    { id: 'profile' as AdminTab, label: 'Profile', icon: User, roles: ['master_admin', 'portfolio_admin'] },
-    { id: 'users' as AdminTab, label: 'User Management', icon: Users, roles: ['master_admin'] },
-    { id: 'themes' as AdminTab, label: 'Theme Control', icon: Palette, roles: ['master_admin'] },
-    { id: 'settings' as AdminTab, label: 'Settings', icon: Settings, roles: ['master_admin', 'portfolio_admin'] },
-    { id: 'backup' as AdminTab, label: 'Backup & Export', icon: Download, roles: ['master_admin'] },
+  const handleNavigate = useCallback((tab: string) => {
+    setActiveTab(tab as AdminTab);
+  }, []);
+
+  const handleAction = useCallback((action: string) => {
+    switch (action) {
+      case 'action:add-project':
+        setActiveTab('portfolio');
+        toast({ title: 'Add a new project', description: 'Portfolio panel opened' });
+        break;
+      case 'action:preview':
+        window.open('/', '_blank');
+        break;
+      case 'action:emergency-lock':
+        setActiveTab('features');
+        break;
+    }
+  }, [toast]);
+
+  // Minimal nav items
+  const navItems = [
+    { id: 'overview' as AdminTab, icon: LayoutDashboard, roles: ['master_admin', 'portfolio_admin', 'viewer'] },
+    { id: 'portfolio' as AdminTab, icon: FolderOpen, roles: ['master_admin', 'portfolio_admin'] },
+    { id: 'profile' as AdminTab, icon: User, roles: ['master_admin', 'portfolio_admin'] },
+    { id: 'users' as AdminTab, icon: Users, roles: ['master_admin'] },
+    { id: 'features' as AdminTab, icon: Zap, roles: ['master_admin'] },
+    { id: 'themes' as AdminTab, icon: Palette, roles: ['master_admin'] },
+    { id: 'settings' as AdminTab, icon: Settings, roles: ['master_admin', 'portfolio_admin'] },
+    { id: 'backup' as AdminTab, icon: Download, roles: ['master_admin'] },
   ].filter(item => item.roles.some(r => roles.includes(r as any)));
 
   const renderContent = () => {
@@ -53,13 +75,15 @@ const AdminDashboard = () => {
       case 'profile':
         return <ProfilePanel />;
       case 'users':
-        return isMasterAdmin ? <UsersPanel /> : <AccessDenied />;
+        return <UserManagementPanel />;
+      case 'features':
+        return <FeatureFlagsPanel />;
       case 'themes':
-        return isMasterAdmin ? <ThemesPanel /> : <AccessDenied />;
+        return <ThemesPanel />;
       case 'settings':
         return <SettingsPanel isMasterAdmin={isMasterAdmin} />;
       case 'backup':
-        return isMasterAdmin ? <BackupPanel /> : <AccessDenied />;
+        return <BackupPanel />;
       default:
         return <OverviewPanel isMasterAdmin={isMasterAdmin} />;
     }
@@ -67,109 +91,78 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-background flex">
-      {/* Mobile menu button */}
-      <button
-        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-card border border-border rounded-lg"
-      >
-        <Menu className="w-5 h-5" />
-      </button>
+      {/* Command Palette */}
+      <CommandPalette onNavigate={handleNavigate} onAction={handleAction} />
 
-      {/* Sidebar */}
-      <aside 
-        className={`
-          fixed lg:relative z-40 h-screen bg-card border-r border-border
-          transition-all duration-300 flex flex-col
-          ${sidebarCollapsed ? 'w-16' : 'w-64'}
-          ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-        `}
-      >
+      {/* Minimal sidebar */}
+      <aside className="w-14 border-r border-border/50 flex flex-col items-center py-4 bg-card/50">
         {/* Logo */}
-        <div className="p-4 border-b border-border flex items-center justify-between">
-          {!sidebarCollapsed && (
-            <div className="flex items-center gap-2">
-              <Shield className="w-6 h-6 text-primary" />
-              <span className="font-display font-bold text-lg">Admin</span>
-            </div>
-          )}
-          <button
-            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className="hidden lg:block p-1 hover:bg-muted rounded transition-colors"
-          >
-            {sidebarCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
-          </button>
+        <div className="w-8 h-8 rounded bg-primary/20 flex items-center justify-center mb-6">
+          <Shield className="w-4 h-4 text-primary" />
         </div>
 
-        {/* Role badge */}
-        <div className={`px-4 py-2 border-b border-border ${sidebarCollapsed ? 'hidden' : ''}`}>
-          <span className={`
-            inline-block px-2 py-1 text-xs font-mono uppercase tracking-wider rounded
-            ${isMasterAdmin ? 'bg-primary/20 text-primary' : 'bg-accent/20 text-accent-foreground'}
-          `}>
-            {isMasterAdmin ? 'Master Admin' : isPortfolioAdmin ? 'Portfolio Admin' : 'Viewer'}
-          </span>
-        </div>
-
-        {/* Navigation */}
-        <nav className="flex-1 p-2 space-y-1 overflow-y-auto">
-          {menuItems.map((item) => (
+        {/* Nav icons */}
+        <nav className="flex-1 flex flex-col items-center gap-1">
+          {navItems.map((item) => (
             <button
               key={item.id}
-              onClick={() => {
-                setActiveTab(item.id);
-                setMobileMenuOpen(false);
-              }}
+              onClick={() => setActiveTab(item.id)}
               className={`
-                w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all
+                w-10 h-10 rounded-lg flex items-center justify-center transition-all
                 ${activeTab === item.id 
                   ? 'bg-primary/20 text-primary' 
                   : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                 }
-                ${sidebarCollapsed ? 'justify-center' : ''}
               `}
-              title={sidebarCollapsed ? item.label : undefined}
+              title={item.id.charAt(0).toUpperCase() + item.id.slice(1)}
             >
-              <item.icon className="w-5 h-5 flex-shrink-0" />
-              {!sidebarCollapsed && (
-                <span className="font-mono text-sm">{item.label}</span>
-              )}
+              <item.icon className="w-5 h-5" />
             </button>
           ))}
         </nav>
 
-        {/* User & Sign out */}
-        <div className="p-4 border-t border-border space-y-2">
-          {!sidebarCollapsed && (
-            <div className="text-xs font-mono text-muted-foreground truncate">
-              {user?.email}
-            </div>
-          )}
+        {/* Bottom actions */}
+        <div className="flex flex-col items-center gap-1 mt-auto">
+          <button
+            onClick={() => navigate('/')}
+            className="w-10 h-10 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground transition-all"
+            title="Go to site"
+          >
+            <Home className="w-5 h-5" />
+          </button>
           <button
             onClick={handleSignOut}
-            className={`
-              w-full flex items-center gap-3 px-3 py-2 rounded-lg
-              text-muted-foreground hover:bg-destructive/20 hover:text-destructive transition-all
-              ${sidebarCollapsed ? 'justify-center' : ''}
-            `}
-            title={sidebarCollapsed ? 'Sign Out' : undefined}
+            className="w-10 h-10 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-destructive/20 hover:text-destructive transition-all"
+            title="Sign out"
           >
             <LogOut className="w-5 h-5" />
-            {!sidebarCollapsed && <span className="font-mono text-sm">Sign Out</span>}
           </button>
         </div>
       </aside>
 
-      {/* Mobile overlay */}
-      {mobileMenuOpen && (
-        <div 
-          className="lg:hidden fixed inset-0 bg-background/80 backdrop-blur-sm z-30"
-          onClick={() => setMobileMenuOpen(false)}
-        />
-      )}
-
       {/* Main content */}
       <main className="flex-1 min-h-screen overflow-auto">
-        <div className="p-4 lg:p-8 pt-16 lg:pt-8">
+        {/* Top bar */}
+        <header className="h-12 border-b border-border/50 flex items-center justify-between px-6 bg-card/30">
+          <div className="flex items-center gap-4">
+            <h1 className="font-display text-sm font-semibold capitalize">{activeTab}</h1>
+            <span className={`
+              px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider rounded
+              ${isMasterAdmin ? 'bg-primary/20 text-primary' : 'bg-muted text-muted-foreground'}
+            `}>
+              {isMasterAdmin ? 'Master' : isPortfolioAdmin ? 'Admin' : 'Viewer'}
+            </span>
+          </div>
+          <button
+            className="flex items-center gap-2 px-3 py-1.5 rounded border border-border/50 text-muted-foreground hover:text-foreground hover:border-border transition-all"
+          >
+            <Command className="w-3 h-3" />
+            <span className="font-mono text-xs">K</span>
+          </button>
+        </header>
+
+        {/* Content */}
+        <div className="p-6 max-w-4xl">
           {renderContent()}
         </div>
       </main>
@@ -179,27 +172,40 @@ const AdminDashboard = () => {
 
 // Panel Components
 const OverviewPanel = ({ isMasterAdmin }: { isMasterAdmin: boolean }) => (
-  <div className="space-y-6">
+  <div className="space-y-8">
     <div>
-      <h1 className="font-display text-3xl font-bold">Dashboard Overview</h1>
-      <p className="text-muted-foreground font-mono text-sm mt-1">
-        {isMasterAdmin ? 'Full system control enabled' : 'Manage your portfolio'}
+      <h1 className="font-display text-2xl font-bold">Dashboard</h1>
+      <p className="text-muted-foreground font-mono text-xs mt-1">
+        {isMasterAdmin ? 'Full system control' : 'Portfolio management'}
       </p>
     </div>
 
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      <StatCard title="Projects" value="0" subtitle="In portfolio" />
-      <StatCard title="Skills" value="0" subtitle="Listed" />
-      <StatCard title="Views" value="--" subtitle="This month" />
-      {isMasterAdmin && <StatCard title="Users" value="--" subtitle="Total" />}
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <StatCard title="Projects" value="0" />
+      <StatCard title="Skills" value="0" />
+      <StatCard title="Views" value="--" />
+      {isMasterAdmin && <StatCard title="Users" value="--" />}
     </div>
 
-    <div className="glass-card p-6">
-      <h2 className="font-display text-xl font-semibold mb-4">Quick Actions</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-        <QuickAction label="Add Project" icon={FolderOpen} />
-        <QuickAction label="Edit Profile" icon={User} />
-        <QuickAction label="View Portfolio" icon={LayoutDashboard} />
+    <div className="space-y-3">
+      <p className="font-mono text-xs text-muted-foreground uppercase tracking-wider">Keyboard shortcuts</p>
+      <div className="grid grid-cols-2 gap-2 text-xs font-mono">
+        <div className="flex justify-between p-2 rounded bg-muted/30">
+          <span className="text-muted-foreground">Command palette</span>
+          <span>⌘K</span>
+        </div>
+        <div className="flex justify-between p-2 rounded bg-muted/30">
+          <span className="text-muted-foreground">Overview</span>
+          <span>⌥1</span>
+        </div>
+        <div className="flex justify-between p-2 rounded bg-muted/30">
+          <span className="text-muted-foreground">Portfolio</span>
+          <span>⌥2</span>
+        </div>
+        <div className="flex justify-between p-2 rounded bg-muted/30">
+          <span className="text-muted-foreground">Profile</span>
+          <span>⌥3</span>
+        </div>
       </div>
     </div>
   </div>
@@ -207,61 +213,38 @@ const OverviewPanel = ({ isMasterAdmin }: { isMasterAdmin: boolean }) => (
 
 const PortfolioPanel = () => (
   <div className="space-y-6">
-    <h1 className="font-display text-3xl font-bold">Portfolio Management</h1>
-    <div className="glass-card p-6">
+    <h1 className="font-display text-2xl font-bold">Portfolio</h1>
+    <div className="rounded-lg border border-dashed border-border/50 p-8 text-center">
+      <FolderOpen className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
       <p className="text-muted-foreground font-mono text-sm">
-        Portfolio management coming soon. You'll be able to:
+        Portfolio management coming soon
       </p>
-      <ul className="mt-4 space-y-2 text-sm font-mono text-muted-foreground">
-        <li>• Add, edit, and remove projects</li>
-        <li>• Manage skills and proficiency levels</li>
-        <li>• Configure social links</li>
-        <li>• Set portfolio visibility</li>
-      </ul>
+      <p className="text-muted-foreground font-mono text-xs mt-2">
+        Add projects • Manage skills • Configure links
+      </p>
     </div>
   </div>
 );
 
 const ProfilePanel = () => (
   <div className="space-y-6">
-    <h1 className="font-display text-3xl font-bold">Profile Settings</h1>
-    <div className="glass-card p-6">
+    <h1 className="font-display text-2xl font-bold">Profile</h1>
+    <div className="rounded-lg border border-dashed border-border/50 p-8 text-center">
+      <User className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
       <p className="text-muted-foreground font-mono text-sm">
-        Profile management coming soon.
+        Profile settings coming soon
       </p>
-    </div>
-  </div>
-);
-
-const UsersPanel = () => (
-  <div className="space-y-6">
-    <h1 className="font-display text-3xl font-bold">User Management</h1>
-    <p className="text-muted-foreground font-mono text-sm">
-      Master Admin only • Manage all users and roles
-    </p>
-    <div className="glass-card p-6">
-      <p className="text-muted-foreground font-mono text-sm">
-        User management features:
-      </p>
-      <ul className="mt-4 space-y-2 text-sm font-mono text-muted-foreground">
-        <li>• View all registered users</li>
-        <li>• Assign or revoke roles</li>
-        <li>• Instantly disable accounts</li>
-        <li>• Monitor user activity</li>
-      </ul>
     </div>
   </div>
 );
 
 const ThemesPanel = () => (
   <div className="space-y-6">
-    <h1 className="font-display text-3xl font-bold">Theme Control</h1>
-    <p className="text-muted-foreground font-mono text-sm">
-      Master Admin only • Global theme settings
-    </p>
-    <div className="glass-card p-6">
+    <h1 className="font-display text-2xl font-bold">Themes</h1>
+    <div className="rounded-lg border border-dashed border-border/50 p-8 text-center">
+      <Palette className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
       <p className="text-muted-foreground font-mono text-sm">
-        Theme control coming soon.
+        Global theme control coming soon
       </p>
     </div>
   </div>
@@ -269,12 +252,11 @@ const ThemesPanel = () => (
 
 const SettingsPanel = ({ isMasterAdmin }: { isMasterAdmin: boolean }) => (
   <div className="space-y-6">
-    <h1 className="font-display text-3xl font-bold">Settings</h1>
-    <div className="glass-card p-6">
+    <h1 className="font-display text-2xl font-bold">Settings</h1>
+    <div className="rounded-lg border border-dashed border-border/50 p-8 text-center">
+      <Settings className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
       <p className="text-muted-foreground font-mono text-sm">
-        {isMasterAdmin 
-          ? 'Full system settings access' 
-          : 'Personal settings only'}
+        {isMasterAdmin ? 'System settings' : 'Personal settings'} coming soon
       </p>
     </div>
   </div>
@@ -282,48 +264,22 @@ const SettingsPanel = ({ isMasterAdmin }: { isMasterAdmin: boolean }) => (
 
 const BackupPanel = () => (
   <div className="space-y-6">
-    <h1 className="font-display text-3xl font-bold">Backup & Export</h1>
-    <p className="text-muted-foreground font-mono text-sm">
-      Master Admin only • System backup tools
-    </p>
-    <div className="glass-card p-6">
+    <h1 className="font-display text-2xl font-bold">Backup</h1>
+    <div className="rounded-lg border border-dashed border-border/50 p-8 text-center">
+      <Download className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
       <p className="text-muted-foreground font-mono text-sm">
-        Backup features:
+        Export & backup tools coming soon
       </p>
-      <ul className="mt-4 space-y-2 text-sm font-mono text-muted-foreground">
-        <li>• Export entire database</li>
-        <li>• Download all media assets</li>
-        <li>• Generate portfolio JSON</li>
-        <li>• Schedule automatic backups</li>
-      </ul>
     </div>
   </div>
 );
 
-const AccessDenied = () => (
-  <div className="glass-card p-8 text-center">
-    <Shield className="w-12 h-12 text-destructive mx-auto mb-4" />
-    <h2 className="font-display text-xl font-bold text-destructive">Access Denied</h2>
-    <p className="text-muted-foreground font-mono text-sm mt-2">
-      This section requires Master Admin privileges.
-    </p>
-  </div>
-);
-
 // Utility components
-const StatCard = ({ title, value, subtitle }: { title: string; value: string; subtitle: string }) => (
-  <div className="glass-card p-4">
-    <p className="font-mono text-xs text-muted-foreground uppercase tracking-wider">{title}</p>
-    <p className="font-display text-3xl font-bold text-neon mt-1">{value}</p>
-    <p className="font-mono text-xs text-muted-foreground">{subtitle}</p>
+const StatCard = ({ title, value }: { title: string; value: string }) => (
+  <div className="p-3 rounded-lg border border-border/50 bg-card/30">
+    <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider">{title}</p>
+    <p className="font-display text-2xl font-bold text-foreground mt-1">{value}</p>
   </div>
-);
-
-const QuickAction = ({ label, icon: Icon }: { label: string; icon: React.ElementType }) => (
-  <button className="flex items-center gap-3 p-3 border border-border rounded-lg hover:border-primary/50 hover:bg-primary/5 transition-all text-left">
-    <Icon className="w-5 h-5 text-primary" />
-    <span className="font-mono text-sm">{label}</span>
-  </button>
 );
 
 export default AdminDashboard;
