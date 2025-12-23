@@ -5,6 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import AuthPage from "./pages/AuthPage";
+import AdminDashboard from "./pages/AdminDashboard";
+import ProtectedRoute from "./components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -18,6 +20,14 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<AuthPage />} />
+          <Route 
+            path="/admin" 
+            element={
+              <ProtectedRoute requiredRoles={['master_admin', 'portfolio_admin']}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            } 
+          />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
