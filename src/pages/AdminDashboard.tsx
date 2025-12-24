@@ -14,12 +14,12 @@ import {
   Zap,
   Command,
   Home,
-  Eye,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import CommandPalette from '@/components/admin/CommandPalette';
 import UserManagementPanel from '@/components/admin/UserManagementPanel';
 import FeatureFlagsPanel from '@/components/admin/FeatureFlagsPanel';
+import AdminThemesPanel from '@/components/admin/ThemesPanel';
 
 type AdminTab = 'overview' | 'portfolio' | 'profile' | 'users' | 'themes' | 'settings' | 'backup' | 'features';
 
@@ -79,7 +79,7 @@ const AdminDashboard = () => {
       case 'features':
         return <FeatureFlagsPanel />;
       case 'themes':
-        return <ThemesPanel />;
+        return <AdminThemesPanel />;
       case 'settings':
         return <SettingsPanel isMasterAdmin={isMasterAdmin} />;
       case 'backup':
@@ -233,18 +233,6 @@ const ProfilePanel = () => (
       <User className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
       <p className="text-muted-foreground font-mono text-sm">
         Profile settings coming soon
-      </p>
-    </div>
-  </div>
-);
-
-const ThemesPanel = () => (
-  <div className="space-y-6">
-    <h1 className="font-display text-2xl font-bold">Themes</h1>
-    <div className="rounded-lg border border-dashed border-border/50 p-8 text-center">
-      <Palette className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
-      <p className="text-muted-foreground font-mono text-sm">
-        Global theme control coming soon
       </p>
     </div>
   </div>

@@ -136,6 +136,7 @@ export type Database = {
           is_published: boolean | null
           slug: string
           subtitle: string | null
+          theme: Database["public"]["Enums"]["portfolio_theme"] | null
           theme_accent: string | null
           theme_primary: string | null
           title: string
@@ -148,6 +149,7 @@ export type Database = {
           is_published?: boolean | null
           slug: string
           subtitle?: string | null
+          theme?: Database["public"]["Enums"]["portfolio_theme"] | null
           theme_accent?: string | null
           theme_primary?: string | null
           title: string
@@ -160,6 +162,7 @@ export type Database = {
           is_published?: boolean | null
           slug?: string
           subtitle?: string | null
+          theme?: Database["public"]["Enums"]["portfolio_theme"] | null
           theme_accent?: string | null
           theme_primary?: string | null
           title?: string
@@ -409,6 +412,13 @@ export type Database = {
     }
     Enums: {
       app_role: "master_admin" | "portfolio_admin" | "viewer"
+      portfolio_theme:
+        | "light"
+        | "dark"
+        | "cyberpunk"
+        | "minimal"
+        | "glass"
+        | "neon"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -537,6 +547,14 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["master_admin", "portfolio_admin", "viewer"],
+      portfolio_theme: [
+        "light",
+        "dark",
+        "cyberpunk",
+        "minimal",
+        "glass",
+        "neon",
+      ],
     },
   },
 } as const
