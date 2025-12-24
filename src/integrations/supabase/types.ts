@@ -14,6 +14,121 @@ export type Database = {
   }
   public: {
     Tables: {
+      education: {
+        Row: {
+          achievements: string[] | null
+          certificate_urls: string[] | null
+          created_at: string
+          degree: string | null
+          description: string | null
+          end_date: string | null
+          field_of_study: string | null
+          id: string
+          institution: string
+          portfolio_id: string
+          sort_order: number | null
+          start_date: string | null
+          updated_at: string
+        }
+        Insert: {
+          achievements?: string[] | null
+          certificate_urls?: string[] | null
+          created_at?: string
+          degree?: string | null
+          description?: string | null
+          end_date?: string | null
+          field_of_study?: string | null
+          id?: string
+          institution: string
+          portfolio_id: string
+          sort_order?: number | null
+          start_date?: string | null
+          updated_at?: string
+        }
+        Update: {
+          achievements?: string[] | null
+          certificate_urls?: string[] | null
+          created_at?: string
+          degree?: string | null
+          description?: string | null
+          end_date?: string | null
+          field_of_study?: string | null
+          id?: string
+          institution?: string
+          portfolio_id?: string
+          sort_order?: number | null
+          start_date?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "education_portfolio_id_fkey"
+            columns: ["portfolio_id"]
+            isOneToOne: false
+            referencedRelation: "portfolios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      experience: {
+        Row: {
+          company: string
+          created_at: string
+          description: string | null
+          employment_type: string | null
+          end_date: string | null
+          id: string
+          is_current: boolean | null
+          key_outcomes: string[] | null
+          portfolio_id: string
+          role: string
+          sort_order: number | null
+          start_date: string | null
+          technologies: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          company: string
+          created_at?: string
+          description?: string | null
+          employment_type?: string | null
+          end_date?: string | null
+          id?: string
+          is_current?: boolean | null
+          key_outcomes?: string[] | null
+          portfolio_id: string
+          role: string
+          sort_order?: number | null
+          start_date?: string | null
+          technologies?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          company?: string
+          created_at?: string
+          description?: string | null
+          employment_type?: string | null
+          end_date?: string | null
+          id?: string
+          is_current?: boolean | null
+          key_outcomes?: string[] | null
+          portfolio_id?: string
+          role?: string
+          sort_order?: number | null
+          start_date?: string | null
+          technologies?: string[] | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experience_portfolio_id_fkey"
+            columns: ["portfolio_id"]
+            isOneToOne: false
+            referencedRelation: "portfolios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       portfolios: {
         Row: {
           created_at: string
@@ -55,34 +170,43 @@ export type Database = {
       }
       profiles: {
         Row: {
+          availability_status: string | null
           avatar_url: string | null
           bio: string | null
           created_at: string
           display_name: string | null
           id: string
           location: string | null
+          markdown_bio: string | null
+          tagline: string | null
           title: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          availability_status?: string | null
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
           display_name?: string | null
           id?: string
           location?: string | null
+          markdown_bio?: string | null
+          tagline?: string | null
           title?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          availability_status?: string | null
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
           display_name?: string | null
           id?: string
           location?: string | null
+          markdown_bio?: string | null
+          tagline?: string | null
           title?: string | null
           updated_at?: string
           user_id?: string
@@ -95,39 +219,63 @@ export type Database = {
           description: string | null
           external_url: string | null
           featured: boolean | null
+          github_url: string | null
           id: string
           image_url: string | null
+          is_visible: boolean | null
+          live_url: string | null
+          media_urls: string[] | null
           portfolio_id: string
+          role_in_project: string | null
+          short_pitch: string | null
           sort_order: number | null
+          status: string | null
           technologies: string[] | null
           title: string
           updated_at: string
+          version: string | null
         }
         Insert: {
           created_at?: string
           description?: string | null
           external_url?: string | null
           featured?: boolean | null
+          github_url?: string | null
           id?: string
           image_url?: string | null
+          is_visible?: boolean | null
+          live_url?: string | null
+          media_urls?: string[] | null
           portfolio_id: string
+          role_in_project?: string | null
+          short_pitch?: string | null
           sort_order?: number | null
+          status?: string | null
           technologies?: string[] | null
           title: string
           updated_at?: string
+          version?: string | null
         }
         Update: {
           created_at?: string
           description?: string | null
           external_url?: string | null
           featured?: boolean | null
+          github_url?: string | null
           id?: string
           image_url?: string | null
+          is_visible?: boolean | null
+          live_url?: string | null
+          media_urls?: string[] | null
           portfolio_id?: string
+          role_in_project?: string | null
+          short_pitch?: string | null
           sort_order?: number | null
+          status?: string | null
           technologies?: string[] | null
           title?: string
           updated_at?: string
+          version?: string | null
         }
         Relationships: [
           {
@@ -143,29 +291,35 @@ export type Database = {
         Row: {
           category: string | null
           created_at: string
+          display_style: string | null
           id: string
           name: string
           portfolio_id: string
           proficiency: number | null
           sort_order: number | null
+          years_experience: number | null
         }
         Insert: {
           category?: string | null
           created_at?: string
+          display_style?: string | null
           id?: string
           name: string
           portfolio_id: string
           proficiency?: number | null
           sort_order?: number | null
+          years_experience?: number | null
         }
         Update: {
           category?: string | null
           created_at?: string
+          display_style?: string | null
           id?: string
           name?: string
           portfolio_id?: string
           proficiency?: number | null
           sort_order?: number | null
+          years_experience?: number | null
         }
         Relationships: [
           {
@@ -180,7 +334,9 @@ export type Database = {
       social_links: {
         Row: {
           created_at: string
+          icon: string | null
           id: string
+          is_visible: boolean | null
           platform: string
           portfolio_id: string
           sort_order: number | null
@@ -188,7 +344,9 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          icon?: string | null
           id?: string
+          is_visible?: boolean | null
           platform: string
           portfolio_id: string
           sort_order?: number | null
@@ -196,7 +354,9 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          icon?: string | null
           id?: string
+          is_visible?: boolean | null
           platform?: string
           portfolio_id?: string
           sort_order?: number | null
