@@ -59,14 +59,21 @@ const AuthPage = () => {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          emailRedirectTo: `${window.location.origin}/admin`,
-        }
+      // Call the edge function to validate email and send OTP
+      const response = await supabase.functions.invoke('request-otp', {
+        body: {
+          email: email.toLowerCase().trim(),
+          redirectTo: `${window.location.origin}/admin`,
+        },
       });
 
-      if (error) throw error;
+      if (response.error) {
+        throw new Error(response.error.message || 'Failed to send magic link');
+      }
+
+      if (response.data?.error) {
+        throw new Error(response.data.error);
+      }
 
       setMagicLinkSent(true);
       toast({
@@ -76,7 +83,7 @@ const AuthPage = () => {
     } catch (error: any) {
       toast({
         title: 'Authentication Error',
-        description: error.message,
+        description: error.message || 'This email is not authorized to access this application.',
         variant: 'destructive',
       });
     } finally {
