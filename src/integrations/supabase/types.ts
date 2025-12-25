@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      allowed_emails: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          email: string
+          is_admin: boolean
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          email: string
+          is_admin?: boolean
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          email?: string
+          is_admin?: boolean
+        }
+        Relationships: []
+      }
       education: {
         Row: {
           achievements: string[] | null
