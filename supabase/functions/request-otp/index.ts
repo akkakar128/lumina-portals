@@ -63,11 +63,12 @@ serve(async (req: Request) => {
 
     console.log(`Email authorized. Is admin: ${allowedEmail.is_admin}`);
 
-    // Send OTP using Supabase Auth
+    // Send OTP code (not magic link) using Supabase Auth
     const { error: otpError } = await supabase.auth.signInWithOtp({
       email: normalizedEmail,
       options: {
-        emailRedirectTo: redirectTo || `${supabaseUrl.replace('.supabase.co', '.lovableproject.com')}/admin`,
+        // Setting shouldCreateUser to true allows new users to be created
+        shouldCreateUser: true,
       },
     });
 

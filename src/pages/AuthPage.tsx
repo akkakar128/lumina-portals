@@ -1,16 +1,18 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2, Mail, ArrowLeft, Shield } from 'lucide-react';
+import { Loader2, Mail, ArrowLeft, Shield, KeyRound } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
+import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
 
 const emailSchema = z.string().email('Please enter a valid email address');
 
 const AuthPage = () => {
   const [email, setEmail] = useState('');
+  const [otpCode, setOtpCode] = useState('');
   const [loading, setLoading] = useState(false);
-  const [magicLinkSent, setMagicLinkSent] = useState(false);
+  const [step, setStep] = useState<'email' | 'otp'>('email');
   const [emailError, setEmailError] = useState('');
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -18,10 +20,9 @@ const AuthPage = () => {
 
   // Verify secret access token
   const accessToken = searchParams.get('access');
-  const validToken = 'phantom-gate-2024'; // In production, this would be time-based or encrypted
+  const validToken = 'phantom-gate-2024';
 
   useEffect(() => {
-    // If no valid access token, redirect away silently
     if (accessToken !== validToken) {
       navigate('/', { replace: true });
       return;
@@ -40,16 +41,14 @@ const AuthPage = () => {
     return () => subscription.unsubscribe();
   }, [navigate, accessToken]);
 
-  // Don't render anything if invalid token
   if (accessToken !== validToken) {
     return null;
   }
 
-  const handleMagicLink = async (e: React.FormEvent) => {
+  const handleRequestOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     setEmailError('');
 
-    // Validate email
     const result = emailSchema.safeParse(email);
     if (!result.success) {
       setEmailError(result.error.errors[0].message);
@@ -59,26 +58,24 @@ const AuthPage = () => {
     setLoading(true);
 
     try {
-      // Call the edge function to validate email and send OTP
       const response = await supabase.functions.invoke('request-otp', {
         body: {
           email: email.toLowerCase().trim(),
-          redirectTo: `${window.location.origin}/admin`,
         },
       });
 
       if (response.error) {
-        throw new Error(response.error.message || 'Failed to send magic link');
+        throw new Error(response.error.message || 'Failed to send verification code');
       }
 
       if (response.data?.error) {
         throw new Error(response.data.error);
       }
 
-      setMagicLinkSent(true);
+      setStep('otp');
       toast({
-        title: 'Magic link sent!',
-        description: 'Check your email for the login link.',
+        title: 'Verification code sent!',
+        description: 'Check your email for the 6-digit code.',
       });
     } catch (error: any) {
       toast({
@@ -91,43 +88,174 @@ const AuthPage = () => {
     }
   };
 
-  if (magicLinkSent) {
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (otpCode.length !== 6) {
+      toast({
+        title: 'Invalid Code',
+        description: 'Please enter the complete 6-digit verification code.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const { data, error } = await supabase.auth.verifyOtp({
+        email: email.toLowerCase().trim(),
+        token: otpCode,
+        type: 'email',
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data?.session) {
+        toast({
+          title: 'Login successful!',
+          description: 'Welcome back.',
+        });
+        navigate('/admin', { replace: true });
+      }
+    } catch (error: any) {
+      toast({
+        title: 'Verification Failed',
+        description: error.message || 'Invalid verification code. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    setLoading(true);
+    try {
+      const response = await supabase.functions.invoke('request-otp', {
+        body: {
+          email: email.toLowerCase().trim(),
+        },
+      });
+
+      if (response.error || response.data?.error) {
+        throw new Error(response.data?.error || 'Failed to resend code');
+      }
+
+      toast({
+        title: 'Code resent!',
+        description: 'Check your email for the new verification code.',
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message,
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // OTP verification step
+  if (step === 'otp') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background cyber-grid p-4">
         <div className="absolute inset-0 bg-gradient-radial from-primary/5 via-transparent to-transparent" />
+        <div className="absolute inset-0 scanlines pointer-events-none opacity-30" />
         
-        <div className="glass-card p-8 w-full max-w-md relative z-10 text-center">
+        <div className="glass-card p-8 w-full max-w-md relative z-10">
           <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-primary/20 flex items-center justify-center">
-            <Mail className="w-8 h-8 text-primary" />
+            <KeyRound className="w-8 h-8 text-primary" />
           </div>
           
-          <h1 className="font-display text-2xl font-bold mb-2 text-neon">
-            Check Your Email
+          <h1 className="font-display text-2xl font-bold text-center mb-2 text-neon">
+            Enter Verification Code
           </h1>
-          <p className="font-mono text-sm text-muted-foreground mb-6">
-            We sent a magic link to <span className="text-foreground">{email}</span>
+          <p className="font-mono text-sm text-muted-foreground text-center mb-2">
+            We sent a 6-digit code to
           </p>
-          <p className="font-mono text-xs text-muted-foreground mb-8">
-            Click the link in your email to sign in. The link will expire in 1 hour.
+          <p className="font-mono text-sm text-primary text-center mb-8">
+            {email}
           </p>
 
-          <button
-            onClick={() => setMagicLinkSent(false)}
-            className="flex items-center justify-center gap-2 mx-auto text-muted-foreground hover:text-primary transition-colors font-mono text-sm"
-          >
-            <ArrowLeft size={16} />
-            Use a different email
-          </button>
+          <form onSubmit={handleVerifyOtp} className="space-y-6">
+            <div className="flex justify-center">
+              <InputOTP
+                maxLength={6}
+                value={otpCode}
+                onChange={(value) => setOtpCode(value)}
+                disabled={loading}
+              >
+                <InputOTPGroup>
+                  <InputOTPSlot index={0} />
+                  <InputOTPSlot index={1} />
+                  <InputOTPSlot index={2} />
+                  <InputOTPSlot index={3} />
+                  <InputOTPSlot index={4} />
+                  <InputOTPSlot index={5} />
+                </InputOTPGroup>
+              </InputOTP>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading || otpCode.length !== 6}
+              className="cyber-button w-full flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Verifying...
+                </>
+              ) : (
+                'Verify & Login'
+              )}
+            </button>
+          </form>
+
+          <div className="mt-6 space-y-3">
+            <button
+              onClick={() => {
+                setStep('email');
+                setOtpCode('');
+              }}
+              disabled={loading}
+              className="flex items-center justify-center gap-2 mx-auto text-muted-foreground hover:text-primary transition-colors font-mono text-sm"
+            >
+              <ArrowLeft size={16} />
+              Use a different email
+            </button>
+            
+            <p className="font-mono text-xs text-center text-muted-foreground/70">
+              Didn't receive the code?{' '}
+              <button
+                type="button"
+                onClick={handleResendOtp}
+                disabled={loading}
+                className="text-primary hover:underline disabled:opacity-50"
+              >
+                Resend
+              </button>
+            </p>
+          </div>
         </div>
+
+        {/* Corner decorations */}
+        <div className="absolute top-4 left-4 w-16 h-16 border-l-2 border-t-2 border-primary/30" />
+        <div className="absolute top-4 right-4 w-16 h-16 border-r-2 border-t-2 border-primary/30" />
+        <div className="absolute bottom-4 left-4 w-16 h-16 border-l-2 border-b-2 border-primary/30" />
+        <div className="absolute bottom-4 right-4 w-16 h-16 border-r-2 border-b-2 border-primary/30" />
       </div>
     );
   }
 
+  // Email input step
   return (
     <div className="min-h-screen flex items-center justify-center bg-background cyber-grid p-4">
       <div className="absolute inset-0 bg-gradient-radial from-primary/5 via-transparent to-transparent" />
-      
-      {/* Scanlines overlay */}
       <div className="absolute inset-0 scanlines pointer-events-none opacity-30" />
       
       <div className="glass-card p-8 w-full max-w-md relative z-10">
@@ -139,10 +267,10 @@ const AuthPage = () => {
           Secure Access
         </h1>
         <p className="font-mono text-xs text-muted-foreground text-center mb-8 uppercase tracking-wider">
-          Passwordless authentication
+          OTP Authentication
         </p>
 
-        <form onSubmit={handleMagicLink} className="space-y-6">
+        <form onSubmit={handleRequestOtp} className="space-y-6">
           <div>
             <label className="font-mono text-xs text-muted-foreground uppercase tracking-wider mb-2 block">
               Email Address
@@ -171,20 +299,20 @@ const AuthPage = () => {
             {loading ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                Sending...
+                Sending Code...
               </>
             ) : (
               <>
                 <Mail className="w-4 h-4" />
-                Send Magic Link
+                Send Verification Code
               </>
             )}
           </button>
         </form>
 
         <p className="font-mono text-xs text-center mt-6 text-muted-foreground/70">
-          A secure login link will be sent to your email.
-          <br />No password required.
+          A 6-digit verification code will be sent to your email.
+          <br />Only authorized emails can receive codes.
         </p>
       </div>
 
