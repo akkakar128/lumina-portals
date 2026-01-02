@@ -103,23 +103,39 @@ const AuthPage = () => {
     setLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.verifyOtp({
-        email: email.toLowerCase().trim(),
-        token: otpCode,
-        type: 'email',
+      // Call our custom verify-otp edge function
+      const response = await supabase.functions.invoke('verify-otp', {
+        body: {
+          email: email.toLowerCase().trim(),
+          code: otpCode,
+        },
       });
 
-      if (error) {
-        throw error;
+      if (response.error) {
+        throw new Error(response.error.message || 'Verification failed');
       }
 
-      if (data?.session) {
-        toast({
-          title: 'Login successful!',
-          description: 'Welcome back.',
-        });
-        navigate('/admin', { replace: true });
+      if (response.data?.error) {
+        throw new Error(response.data.error);
       }
+
+      // Set the session from the response
+      const { access_token, refresh_token } = response.data;
+      
+      const { error: sessionError } = await supabase.auth.setSession({
+        access_token,
+        refresh_token,
+      });
+
+      if (sessionError) {
+        throw sessionError;
+      }
+
+      toast({
+        title: 'Login successful!',
+        description: 'Welcome back.',
+      });
+      navigate('/admin', { replace: true });
     } catch (error: any) {
       toast({
         title: 'Verification Failed',
