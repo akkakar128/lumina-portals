@@ -78,11 +78,20 @@ const AuthPage = () => {
         description: 'Check your email for the 6-digit code.',
       });
     } catch (error: any) {
+      const isNotAuthorized = error.message?.includes('not authorized');
       toast({
-        title: 'Authentication Error',
-        description: error.message || 'This email is not authorized to access this application.',
+        title: isNotAuthorized ? 'Access Denied' : 'Authentication Error',
+        description: isNotAuthorized 
+          ? 'You are not allowed to access this application. Redirecting to homepage...'
+          : error.message || 'Failed to send verification code.',
         variant: 'destructive',
       });
+      
+      if (isNotAuthorized) {
+        setTimeout(() => {
+          navigate('/', { replace: true });
+        }, 2000);
+      }
     } finally {
       setLoading(false);
     }
