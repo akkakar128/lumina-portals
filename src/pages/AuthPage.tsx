@@ -64,12 +64,30 @@ const AuthPage = () => {
         },
       });
 
-      if (response.error) {
-        throw new Error(response.error.message || 'Failed to send verification code');
+      // Check for error in response data (edge function returns error in body)
+      if (response.data?.error) {
+        const errorMessage = response.data.error;
+        const isNotAuthorized = errorMessage.includes('not authorized');
+        
+        toast({
+          title: isNotAuthorized ? 'Access Denied' : 'Authentication Error',
+          description: isNotAuthorized 
+            ? 'You are not allowed to access this application. Redirecting to homepage...'
+            : errorMessage,
+          variant: 'destructive',
+        });
+        
+        if (isNotAuthorized) {
+          setTimeout(() => {
+            navigate('/', { replace: true });
+          }, 2000);
+        }
+        return;
       }
 
-      if (response.data?.error) {
-        throw new Error(response.data.error);
+      // Check for invoke error (network issues, etc.)
+      if (response.error) {
+        throw new Error(response.error.message || 'Failed to send verification code');
       }
 
       setStep('otp');
@@ -78,20 +96,11 @@ const AuthPage = () => {
         description: 'Check your email for the 6-digit code.',
       });
     } catch (error: any) {
-      const isNotAuthorized = error.message?.includes('not authorized');
       toast({
-        title: isNotAuthorized ? 'Access Denied' : 'Authentication Error',
-        description: isNotAuthorized 
-          ? 'You are not allowed to access this application. Redirecting to homepage...'
-          : error.message || 'Failed to send verification code.',
+        title: 'Error',
+        description: error.message || 'Something went wrong. Please try again.',
         variant: 'destructive',
       });
-      
-      if (isNotAuthorized) {
-        setTimeout(() => {
-          navigate('/', { replace: true });
-        }, 2000);
-      }
     } finally {
       setLoading(false);
     }
