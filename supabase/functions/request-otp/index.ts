@@ -105,7 +105,7 @@ serve(async (req: Request) => {
     const resend = new Resend(resendApiKey);
 
     const { error: emailError } = await resend.emails.send({
-      from: "Portfolio Admin <onboarding@resend.dev>",
+      from: "Admin <adilurrehmanofficial@gmail.com>",
       to: [normalizedEmail],
       subject: "Your Verification Code",
       html: `
