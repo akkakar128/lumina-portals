@@ -1,10 +1,17 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2, Mail, ArrowLeft, Shield, KeyRound } from 'lucide-react';
+import { Loader2, Mail, ArrowLeft, Shield, KeyRound, AlertTriangle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 const emailSchema = z.string().email('Please enter a valid email address');
 
@@ -15,9 +22,43 @@ const isUnauthorizedInvoke = (info: InvokeErrorInfo) =>
   info.status === 403 ||
   /not authorized|not allowed|unauthorized/i.test(info.message);
 
+/**
+ * Extract error info from supabase.functions.invoke() response OR a thrown error.
+ */
 const getInvokeErrorInfo = async (
-  response: { data?: any; error?: any },
+  responseOrError: { data?: any; error?: any } | Error,
 ): Promise<InvokeErrorInfo | null> => {
+  // Handle thrown errors (from catch block)
+  if (responseOrError instanceof Error) {
+    const err = responseOrError as any;
+    const cause = err.cause ?? err;
+    const ctx = cause?.context;
+    const status = typeof ctx?.status === 'number' ? ctx.status : undefined;
+
+    let message = '';
+
+    if (ctx && typeof ctx.clone === 'function') {
+      try {
+        const payload = await ctx.clone().json();
+        message = payload?.error || payload?.message || '';
+      } catch {
+        try {
+          message = await ctx.clone().text();
+        } catch {
+          message = '';
+        }
+      }
+    }
+
+    return {
+      status,
+      message: message || err.message || 'Request failed',
+    };
+  }
+
+  // Handle response object
+  const response = responseOrError as { data?: any; error?: any };
+
   // Some functions return error objects in a 2xx body.
   const bodyError = response?.data?.error;
   if (bodyError) return { message: String(bodyError) };
@@ -72,9 +113,36 @@ const AuthPage = () => {
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState<'email' | 'otp'>('email');
   const [emailError, setEmailError] = useState('');
+  const [accessDeniedOpen, setAccessDeniedOpen] = useState(false);
+  const [redirectCountdown, setRedirectCountdown] = useState(3);
+  const countdownRef = useRef<NodeJS.Timeout | null>(null);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Handle access denied popup with countdown
+  const showAccessDenied = () => {
+    setAccessDeniedOpen(true);
+    setRedirectCountdown(3);
+
+    countdownRef.current = setInterval(() => {
+      setRedirectCountdown((prev) => {
+        if (prev <= 1) {
+          if (countdownRef.current) clearInterval(countdownRef.current);
+          navigate('/', { replace: true });
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  // Cleanup countdown on unmount
+  useEffect(() => {
+    return () => {
+      if (countdownRef.current) clearInterval(countdownRef.current);
+    };
+  }, []);
 
   // Verify secret access token
   const accessToken = searchParams.get('access');
@@ -125,22 +193,18 @@ const AuthPage = () => {
       const errorInfo = await getInvokeErrorInfo(response);
 
       if (errorInfo) {
-        const denied = isUnauthorizedInvoke(errorInfo);
-
-        toast({
-          title: denied ? 'Access Denied' : 'Error',
-          description: denied
-            ? 'You are not allowed to send OTP. Redirecting to homepage...'
-            : errorInfo.message,
-          variant: 'destructive',
-        });
-
-        if (denied) {
-          setTimeout(() => {
-            navigate('/', { replace: true });
-          }, 2000);
+        console.log('[OTP Request] Error detected:', { status: errorInfo.status, message: errorInfo.message, isUnauthorized: isUnauthorizedInvoke(errorInfo) });
+        
+        if (isUnauthorizedInvoke(errorInfo)) {
+          showAccessDenied();
+          return;
         }
 
+        toast({
+          title: 'Error',
+          description: errorInfo.message,
+          variant: 'destructive',
+        });
         return;
       }
 
@@ -150,9 +214,18 @@ const AuthPage = () => {
         description: 'Check your email for the 6-digit code.',
       });
     } catch (error: any) {
+      // Handle thrown errors (some Supabase versions throw instead of returning error)
+      const errorInfo = await getInvokeErrorInfo(error);
+      
+      if (errorInfo && isUnauthorizedInvoke(errorInfo)) {
+        console.log('[OTP Request] Thrown error - unauthorized:', { status: errorInfo.status, message: errorInfo.message });
+        showAccessDenied();
+        return;
+      }
+
       toast({
         title: 'Error',
-        description: error.message || 'Something went wrong. Please try again.',
+        description: errorInfo?.message || error.message || 'Something went wrong. Please try again.',
         variant: 'destructive',
       });
     } finally {
@@ -231,20 +304,16 @@ const AuthPage = () => {
       const errorInfo = await getInvokeErrorInfo(response);
 
       if (errorInfo) {
-        const denied = isUnauthorizedInvoke(errorInfo);
-
-        toast({
-          title: denied ? 'Access Denied' : 'Error',
-          description: denied
-            ? 'You are not allowed to send OTP. Redirecting to homepage...'
-            : errorInfo.message,
-          variant: 'destructive',
-        });
-
-        if (denied) {
-          setTimeout(() => navigate('/', { replace: true }), 2000);
+        if (isUnauthorizedInvoke(errorInfo)) {
+          showAccessDenied();
+          return;
         }
 
+        toast({
+          title: 'Error',
+          description: errorInfo.message,
+          variant: 'destructive',
+        });
         return;
       }
 
@@ -253,9 +322,16 @@ const AuthPage = () => {
         description: 'Check your email for the new verification code.',
       });
     } catch (error: any) {
+      const errorInfo = await getInvokeErrorInfo(error);
+      
+      if (errorInfo && isUnauthorizedInvoke(errorInfo)) {
+        showAccessDenied();
+        return;
+      }
+
       toast({
         title: 'Error',
-        description: error.message,
+        description: errorInfo?.message || error.message,
         variant: 'destructive',
       });
     } finally {
@@ -358,6 +434,26 @@ const AuthPage = () => {
 
   // Email input step
   return (
+    <>
+      {/* Access Denied Popup */}
+      <AlertDialog open={accessDeniedOpen}>
+        <AlertDialogContent className="border-destructive/50 bg-background">
+          <AlertDialogHeader className="text-center">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-destructive/20 flex items-center justify-center">
+              <AlertTriangle className="w-8 h-8 text-destructive" />
+            </div>
+            <AlertDialogTitle className="text-xl font-display text-destructive">
+              Access Denied
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-center space-y-2">
+              <p>You are not allowed to send OTP.</p>
+              <p className="text-muted-foreground">
+                Redirecting to homepage in <span className="text-primary font-bold">{redirectCountdown}</span> seconds...
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+        </AlertDialogContent>
+      </AlertDialog>
     <div className="min-h-screen flex items-center justify-center bg-background cyber-grid p-4">
       <div className="absolute inset-0 bg-gradient-radial from-primary/5 via-transparent to-transparent" />
       <div className="absolute inset-0 scanlines pointer-events-none opacity-30" />
@@ -426,6 +522,7 @@ const AuthPage = () => {
       <div className="absolute bottom-4 left-4 w-16 h-16 border-l-2 border-b-2 border-primary/30" />
       <div className="absolute bottom-4 right-4 w-16 h-16 border-r-2 border-b-2 border-primary/30" />
     </div>
+    </>
   );
 };
 
