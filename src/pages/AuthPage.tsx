@@ -65,14 +65,15 @@ const AuthPage = () => {
       });
 
       // Check for error in response data (edge function returns error in body)
-      if (response.data?.error) {
-        const errorMessage = response.data.error;
-        const isNotAuthorized = errorMessage.includes('not authorized');
+      const errorMessage = response.data?.error || response.error?.message;
+      
+      if (errorMessage) {
+        const isNotAuthorized = errorMessage.toLowerCase().includes('not authorized');
         
         toast({
-          title: isNotAuthorized ? 'Access Denied' : 'Authentication Error',
+          title: isNotAuthorized ? 'Access Denied' : 'Error',
           description: isNotAuthorized 
-            ? 'You are not allowed to access this application. Redirecting to homepage...'
+            ? 'You are not allowed to send OTP. Redirecting to homepage...'
             : errorMessage,
           variant: 'destructive',
         });
@@ -80,14 +81,9 @@ const AuthPage = () => {
         if (isNotAuthorized) {
           setTimeout(() => {
             navigate('/', { replace: true });
-          }, 2000);
+          }, 3000);
         }
         return;
-      }
-
-      // Check for invoke error (network issues, etc.)
-      if (response.error) {
-        throw new Error(response.error.message || 'Failed to send verification code');
       }
 
       setStep('otp');
