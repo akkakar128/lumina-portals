@@ -8,6 +8,64 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp
 
 const emailSchema = z.string().email('Please enter a valid email address');
 
+type InvokeErrorInfo = { status?: number; message: string };
+
+const isUnauthorizedInvoke = (info: InvokeErrorInfo) =>
+  info.status === 401 ||
+  info.status === 403 ||
+  /not authorized|not allowed|unauthorized/i.test(info.message);
+
+const getInvokeErrorInfo = async (
+  response: { data?: any; error?: any },
+): Promise<InvokeErrorInfo | null> => {
+  // Some functions return error objects in a 2xx body.
+  const bodyError = response?.data?.error;
+  if (bodyError) return { message: String(bodyError) };
+
+  const err = response?.error;
+  if (!err) return null;
+
+  const ctx = (err as any).context;
+  const status = typeof ctx?.status === 'number' ? ctx.status : undefined;
+
+  let payload: any = null;
+
+  // Supabase FunctionsHttpError exposes a Response in `error.context`.
+  if (ctx && typeof ctx.clone === 'function') {
+    try {
+      payload = await ctx.clone().json();
+    } catch {
+      try {
+        payload = await ctx.clone().text();
+      } catch {
+        payload = null;
+      }
+    }
+  } else if (ctx?.body) {
+    payload = ctx.body;
+  }
+
+  let message = '';
+
+  if (payload) {
+    if (typeof payload === 'string') {
+      try {
+        const parsed = JSON.parse(payload);
+        message = parsed?.error || parsed?.message || payload;
+      } catch {
+        message = payload;
+      }
+    } else if (typeof payload === 'object') {
+      message = payload?.error || payload?.message || '';
+    }
+  }
+
+  return {
+    status,
+    message: message || err.message || 'Request failed',
+  };
+};
+
 const AuthPage = () => {
   const [email, setEmail] = useState('');
   const [otpCode, setOtpCode] = useState('');
@@ -64,25 +122,25 @@ const AuthPage = () => {
         },
       });
 
-      // Check for error in response data (edge function returns error in body)
-      const errorMessage = response.data?.error || response.error?.message;
-      
-      if (errorMessage) {
-        const isNotAuthorized = errorMessage.toLowerCase().includes('not authorized');
-        
+      const errorInfo = await getInvokeErrorInfo(response);
+
+      if (errorInfo) {
+        const denied = isUnauthorizedInvoke(errorInfo);
+
         toast({
-          title: isNotAuthorized ? 'Access Denied' : 'Error',
-          description: isNotAuthorized 
+          title: denied ? 'Access Denied' : 'Error',
+          description: denied
             ? 'You are not allowed to send OTP. Redirecting to homepage...'
-            : errorMessage,
+            : errorInfo.message,
           variant: 'destructive',
         });
-        
-        if (isNotAuthorized) {
+
+        if (denied) {
           setTimeout(() => {
             navigate('/', { replace: true });
-          }, 3000);
+          }, 2000);
         }
+
         return;
       }
 
@@ -170,8 +228,24 @@ const AuthPage = () => {
         },
       });
 
-      if (response.error || response.data?.error) {
-        throw new Error(response.data?.error || 'Failed to resend code');
+      const errorInfo = await getInvokeErrorInfo(response);
+
+      if (errorInfo) {
+        const denied = isUnauthorizedInvoke(errorInfo);
+
+        toast({
+          title: denied ? 'Access Denied' : 'Error',
+          description: denied
+            ? 'You are not allowed to send OTP. Redirecting to homepage...'
+            : errorInfo.message,
+          variant: 'destructive',
+        });
+
+        if (denied) {
+          setTimeout(() => navigate('/', { replace: true }), 2000);
+        }
+
+        return;
       }
 
       toast({
