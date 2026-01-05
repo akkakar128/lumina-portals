@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { ExternalLink, Github, ChevronRight } from 'lucide-react';
 
 interface Project {
@@ -53,31 +53,11 @@ const demoProjects: Project[] = [
 ];
 
 const ProjectsSection = () => {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const [isVisible, setIsVisible] = useState(false);
   const [hoveredProject, setHoveredProject] = useState<string | null>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
-    }
-
-    return () => observer.disconnect();
-  }, []);
 
   return (
     <section
       id="projects"
-      ref={sectionRef}
       className="relative py-24 md:py-32 overflow-hidden"
     >
       {/* Background */}
@@ -86,7 +66,7 @@ const ProjectsSection = () => {
 
       <div className="container mx-auto px-4 relative z-10">
         {/* Section header */}
-        <div className={`text-center mb-16 ${isVisible ? 'animate-fadeIn' : 'opacity-0'}`}>
+        <div className="text-center mb-16 scroll-section-header">
           <span className="font-mono text-xs uppercase tracking-[0.3em] text-primary mb-4 block">
             // Portfolio
           </span>
@@ -103,10 +83,9 @@ const ProjectsSection = () => {
           {demoProjects.map((project, index) => (
             <div
               key={project.id}
-              className={`group relative glass-card overflow-hidden ${
+              className={`group relative glass-card overflow-hidden scroll-card scroll-delay-${Math.min(index + 1, 4)} ${
                 project.featured ? 'lg:col-span-1' : ''
-              } ${isVisible ? 'animate-slideUp' : 'opacity-0'}`}
-              style={{ animationDelay: `${index * 0.15}s` }}
+              }`}
               onMouseEnter={() => setHoveredProject(project.id)}
               onMouseLeave={() => setHoveredProject(null)}
             >
@@ -190,7 +169,7 @@ const ProjectsSection = () => {
         </div>
 
         {/* View all button */}
-        <div className={`text-center mt-12 ${isVisible ? 'animate-fadeIn animation-delay-600' : 'opacity-0'}`}>
+        <div className="text-center mt-12 scroll-fade-up">
           <button className="cyber-button inline-flex items-center gap-2">
             View All Projects
             <ChevronRight className="w-4 h-4" />

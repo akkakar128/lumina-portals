@@ -1,27 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
 import { Code, Palette, Zap, Globe } from 'lucide-react';
 
 const AboutSection = () => {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-        }
-      },
-      { threshold: 0.2 }
-    );
-
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
-    }
-
-    return () => observer.disconnect();
-  }, []);
-
   const features = [
     {
       icon: Code,
@@ -48,7 +27,6 @@ const AboutSection = () => {
   return (
     <section
       id="about"
-      ref={sectionRef}
       className="relative py-24 md:py-32 overflow-hidden"
     >
       {/* Background elements */}
@@ -58,7 +36,7 @@ const AboutSection = () => {
 
       <div className="container mx-auto px-4 relative z-10">
         {/* Section header */}
-        <div className={`text-center mb-16 ${isVisible ? 'animate-fadeIn' : 'opacity-0'}`}>
+        <div className="text-center mb-16 scroll-section-header">
           <span className="font-mono text-xs uppercase tracking-[0.3em] text-primary mb-4 block">
             // About
           </span>
@@ -76,10 +54,7 @@ const AboutSection = () => {
           {features.map((feature, index) => (
             <div
               key={feature.title}
-              className={`glass-card p-6 md:p-8 group hover:border-primary/50 transition-all duration-500 ${
-                isVisible ? 'animate-slideUp' : 'opacity-0'
-              }`}
-              style={{ animationDelay: `${index * 0.15}s` }}
+              className={`glass-card p-6 md:p-8 group hover:border-primary/50 transition-all duration-500 scroll-card scroll-delay-${Math.min(index + 1, 4)}`}
             >
               <div className="flex items-start gap-4">
                 <div className="p-3 rounded-lg bg-primary/10 border border-primary/20 group-hover:bg-primary/20 transition-colors">
@@ -104,14 +79,14 @@ const AboutSection = () => {
         </div>
 
         {/* Stats row */}
-        <div className={`mt-16 grid grid-cols-2 md:grid-cols-4 gap-8 ${isVisible ? 'animate-fadeIn animation-delay-600' : 'opacity-0'}`}>
+        <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-8 scroll-stats">
           {[
             { value: '5+', label: 'Years Experience' },
             { value: '50+', label: 'Projects Completed' },
             { value: '30+', label: 'Happy Clients' },
             { value: '∞', label: 'Lines of Code' },
-          ].map((stat) => (
-            <div key={stat.label} className="text-center">
+          ].map((stat, index) => (
+            <div key={stat.label} className={`text-center scroll-fade-up scroll-delay-${Math.min(index + 1, 4)}`}>
               <div className="font-display text-4xl md:text-5xl font-bold text-neon mb-2">
                 {stat.value}
               </div>
