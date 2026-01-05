@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 
 interface Skill {
   name: string;
@@ -24,27 +24,8 @@ const demoSkills: Skill[] = [
 const categories = ['All', ...Array.from(new Set(demoSkills.map(s => s.category)))];
 
 const SkillsSection = () => {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const [isVisible, setIsVisible] = useState(false);
   const [activeCategory, setActiveCategory] = useState('All');
   const [hoveredSkill, setHoveredSkill] = useState<string | null>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-        }
-      },
-      { threshold: 0.2 }
-    );
-
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
-    }
-
-    return () => observer.disconnect();
-  }, []);
 
   const filteredSkills = activeCategory === 'All'
     ? demoSkills
@@ -53,7 +34,6 @@ const SkillsSection = () => {
   return (
     <section
       id="skills"
-      ref={sectionRef}
       className="relative py-24 md:py-32 overflow-hidden"
     >
       {/* Background */}
@@ -62,7 +42,7 @@ const SkillsSection = () => {
 
       <div className="container mx-auto px-4 relative z-10">
         {/* Section header */}
-        <div className={`text-center mb-16 ${isVisible ? 'animate-fadeIn' : 'opacity-0'}`}>
+        <div className="text-center mb-16 scroll-section-header">
           <span className="font-mono text-xs uppercase tracking-[0.3em] text-primary mb-4 block">
             // Expertise
           </span>
@@ -75,7 +55,7 @@ const SkillsSection = () => {
         </div>
 
         {/* Category filters */}
-        <div className={`flex flex-wrap justify-center gap-3 mb-12 ${isVisible ? 'animate-fadeIn animation-delay-200' : 'opacity-0'}`}>
+        <div className="flex flex-wrap justify-center gap-3 mb-12 scroll-fade-up">
           {categories.map((category) => (
             <button
               key={category}
@@ -96,8 +76,7 @@ const SkillsSection = () => {
           {filteredSkills.map((skill, index) => (
             <div
               key={skill.name}
-              className={`glass-card p-5 group cursor-default ${isVisible ? 'animate-slideUp' : 'opacity-0'}`}
-              style={{ animationDelay: `${index * 0.1}s` }}
+              className={`glass-card p-5 group cursor-default scroll-card scroll-delay-${Math.min((index % 4) + 1, 4)}`}
               onMouseEnter={() => setHoveredSkill(skill.name)}
               onMouseLeave={() => setHoveredSkill(null)}
             >
@@ -115,8 +94,7 @@ const SkillsSection = () => {
                 <div
                   className="h-full bg-gradient-to-r from-primary to-secondary rounded-full transition-all duration-1000 ease-out"
                   style={{
-                    width: isVisible ? `${skill.proficiency}%` : '0%',
-                    transitionDelay: `${index * 0.1 + 0.5}s`,
+                    width: `${skill.proficiency}%`,
                     boxShadow: hoveredSkill === skill.name ? '0 0 20px hsl(var(--primary) / 0.5)' : 'none',
                   }}
                 />
@@ -133,7 +111,7 @@ const SkillsSection = () => {
         </div>
 
         {/* Additional info */}
-        <div className={`mt-16 text-center ${isVisible ? 'animate-fadeIn animation-delay-600' : 'opacity-0'}`}>
+        <div className="mt-16 text-center scroll-fade-up">
           <p className="font-mono text-sm text-muted-foreground">
             And many more technologies explored and mastered over the years...
           </p>
