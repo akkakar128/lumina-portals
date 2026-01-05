@@ -105,7 +105,7 @@ serve(async (req: Request) => {
     const resend = new Resend(resendApiKey);
 
     const { error: emailError } = await resend.emails.send({
-      from: "Admin <adilurrehmanofficial@gmail.com>",
+      from: "Admin Portal <onboarding@resend.dev>",
       to: [normalizedEmail],
       subject: "🔐 Your Secure Access Code",
       html: `
@@ -235,8 +235,10 @@ serve(async (req: Request) => {
     if (emailError) {
       console.error("Error sending email:", emailError);
       return new Response(
-        JSON.stringify({ error: "Failed to send verification email" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({
+          error: emailError.message || "Failed to send verification email",
+        }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
