@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Scene3D from '../3d/Scene3D';
 import { ChevronDown } from 'lucide-react';
 
@@ -14,6 +14,13 @@ const HeroSection = ({
   subtitle = "Full-Stack Developer • 3D Artist • Creative Technologist"
 }: HeroSectionProps) => {
   const heroRef = useRef<HTMLDivElement>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    // Trigger animations after mount
+    const timer = setTimeout(() => setIsLoaded(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -55,40 +62,40 @@ const HeroSection = ({
       {/* Content */}
       <div className="relative z-20 container mx-auto px-4 text-center">
         {/* Glowing orb behind text */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-primary/10 blur-[120px] animate-glow pointer-events-none" />
+        <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-primary/10 blur-[120px] animate-glow pointer-events-none transition-all duration-1000 ${isLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}`} />
         
         <div className="relative">
           {/* Status indicator */}
-          <div className="flex items-center justify-center gap-2 mb-6 animate-fadeIn">
+          <div className={`flex items-center justify-center gap-2 mb-6 transition-all duration-700 ${isLoaded ? 'scroll-fade-down' : 'scroll-hidden'}`} style={{ animationDelay: '0ms' }}>
             <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
             <span className="font-mono text-xs uppercase tracking-[0.3em] text-muted-foreground">
               Available for projects
             </span>
           </div>
 
-          {/* Main heading */}
-          <h1 className="font-display text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter mb-6 opacity-0 animate-slideUp">
+          {/* Main heading with glitch effect */}
+          <h1 className={`font-display text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter mb-6 ${isLoaded ? 'scroll-glitch-in' : 'scroll-hidden'}`} style={{ animationDelay: '200ms' }}>
             <span className="text-neon">{name}</span>
           </h1>
 
-          {/* Subtitle */}
-          <p className="font-display text-xl md:text-3xl lg:text-4xl font-light text-foreground/80 mb-4 opacity-0 animate-slideUp animation-delay-200">
+          {/* Subtitle with blur-in */}
+          <p className={`font-display text-xl md:text-3xl lg:text-4xl font-light text-foreground/80 mb-4 ${isLoaded ? 'scroll-blur-in' : 'scroll-hidden'}`} style={{ animationDelay: '400ms' }}>
             {title}
           </p>
 
-          {/* Role */}
-          <p className="font-mono text-sm md:text-base text-muted-foreground uppercase tracking-[0.2em] mb-12 opacity-0 animate-slideUp animation-delay-400">
+          {/* Role with fade-up */}
+          <p className={`font-mono text-sm md:text-base text-muted-foreground uppercase tracking-[0.2em] mb-12 ${isLoaded ? 'scroll-fade-up' : 'scroll-hidden'}`} style={{ animationDelay: '600ms' }}>
             {subtitle}
           </p>
 
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 opacity-0 animate-slideUp animation-delay-600">
-            <a href="#projects" className="cyber-button">
-              View Projects
+          {/* CTA Buttons with bounce-in */}
+          <div className={`flex flex-col sm:flex-row items-center justify-center gap-4 ${isLoaded ? 'scroll-bounce-in' : 'scroll-hidden'}`} style={{ animationDelay: '800ms' }}>
+            <a href="#projects" className="cyber-button group">
+              <span className="relative z-10">View Projects</span>
             </a>
             <a
               href="#contact"
-              className="px-8 py-3 font-display font-semibold uppercase tracking-widest border border-muted-foreground/30 text-foreground hover:border-primary hover:text-primary transition-all duration-300"
+              className="px-8 py-3 font-display font-semibold uppercase tracking-widest border border-muted-foreground/30 text-foreground hover:border-primary hover:text-primary hover:shadow-glow-sm transition-all duration-300"
             >
               Contact Me
             </a>
@@ -96,22 +103,22 @@ const HeroSection = ({
         </div>
       </div>
 
-      {/* Scroll indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 opacity-0 animate-fadeIn animation-delay-800">
+      {/* Scroll indicator with float animation */}
+      <div className={`absolute bottom-8 left-1/2 -translate-x-1/2 z-20 ${isLoaded ? 'scroll-fade-up' : 'scroll-hidden'}`} style={{ animationDelay: '1000ms' }}>
         <a
           href="#about"
-          className="flex flex-col items-center gap-2 text-muted-foreground hover:text-primary transition-colors"
+          className="flex flex-col items-center gap-2 text-muted-foreground hover:text-primary transition-colors group"
         >
           <span className="font-mono text-xs uppercase tracking-widest">Scroll</span>
-          <ChevronDown className="w-5 h-5 animate-bounce" />
+          <ChevronDown className="w-5 h-5 animate-bounce group-hover:text-primary" />
         </a>
       </div>
 
-      {/* Corner decorations */}
-      <div className="absolute top-4 left-4 w-20 h-20 border-l-2 border-t-2 border-primary/30 z-20" />
-      <div className="absolute top-4 right-4 w-20 h-20 border-r-2 border-t-2 border-primary/30 z-20" />
-      <div className="absolute bottom-4 left-4 w-20 h-20 border-l-2 border-b-2 border-primary/30 z-20" />
-      <div className="absolute bottom-4 right-4 w-20 h-20 border-r-2 border-b-2 border-primary/30 z-20" />
+      {/* Corner decorations with staggered animations */}
+      <div className={`absolute top-4 left-4 w-20 h-20 border-l-2 border-t-2 border-primary/30 z-20 transition-all duration-700 ${isLoaded ? 'opacity-100' : 'opacity-0 -translate-x-4 -translate-y-4'}`} style={{ transitionDelay: '300ms' }} />
+      <div className={`absolute top-4 right-4 w-20 h-20 border-r-2 border-t-2 border-primary/30 z-20 transition-all duration-700 ${isLoaded ? 'opacity-100' : 'opacity-0 translate-x-4 -translate-y-4'}`} style={{ transitionDelay: '400ms' }} />
+      <div className={`absolute bottom-4 left-4 w-20 h-20 border-l-2 border-b-2 border-primary/30 z-20 transition-all duration-700 ${isLoaded ? 'opacity-100' : 'opacity-0 -translate-x-4 translate-y-4'}`} style={{ transitionDelay: '500ms' }} />
+      <div className={`absolute bottom-4 right-4 w-20 h-20 border-r-2 border-b-2 border-primary/30 z-20 transition-all duration-700 ${isLoaded ? 'opacity-100' : 'opacity-0 translate-x-4 translate-y-4'}`} style={{ transitionDelay: '600ms' }} />
     </section>
   );
 };

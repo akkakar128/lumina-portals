@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
+import { useScrollAnimation, useStaggerAnimation } from '@/hooks/useScrollAnimation';
 
 interface Skill {
   name: string;
@@ -24,27 +25,16 @@ const demoSkills: Skill[] = [
 const categories = ['All', ...Array.from(new Set(demoSkills.map(s => s.category)))];
 
 const SkillsSection = () => {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const [isVisible, setIsVisible] = useState(false);
+  const { ref: headerRef, isVisible: headerVisible } = useScrollAnimation({ threshold: 0.2 });
+  const { ref: filtersRef, isVisible: filtersVisible } = useScrollAnimation({ threshold: 0.3 });
+  const { ref: gridRef, isVisible: gridVisible, getItemAnimationStyle } = useStaggerAnimation(12, { 
+    threshold: 0.1,
+    staggerDelay: 80 
+  });
+  const { ref: footerRef, isVisible: footerVisible } = useScrollAnimation({ threshold: 0.5 });
+  
   const [activeCategory, setActiveCategory] = useState('All');
   const [hoveredSkill, setHoveredSkill] = useState<string | null>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-        }
-      },
-      { threshold: 0.2 }
-    );
-
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
-    }
-
-    return () => observer.disconnect();
-  }, []);
 
   const filteredSkills = activeCategory === 'All'
     ? demoSkills
@@ -53,7 +43,6 @@ const SkillsSection = () => {
   return (
     <section
       id="skills"
-      ref={sectionRef}
       className="relative py-24 md:py-32 overflow-hidden"
     >
       {/* Background */}
@@ -61,8 +50,11 @@ const SkillsSection = () => {
       <div className="absolute bottom-0 left-1/4 w-[500px] h-[500px] bg-accent/5 rounded-full blur-[150px]" />
 
       <div className="container mx-auto px-4 relative z-10">
-        {/* Section header */}
-        <div className={`text-center mb-16 ${isVisible ? 'animate-fadeIn' : 'opacity-0'}`}>
+        {/* Section header with fade-down animation */}
+        <div 
+          ref={headerRef}
+          className={`text-center mb-16 ${headerVisible ? 'scroll-fade-down' : 'scroll-hidden'}`}
+        >
           <span className="font-mono text-xs uppercase tracking-[0.3em] text-primary mb-4 block">
             // Expertise
           </span>
@@ -74,30 +66,34 @@ const SkillsSection = () => {
           </p>
         </div>
 
-        {/* Category filters */}
-        <div className={`flex flex-wrap justify-center gap-3 mb-12 ${isVisible ? 'animate-fadeIn animation-delay-200' : 'opacity-0'}`}>
-          {categories.map((category) => (
+        {/* Category filters with swing animation */}
+        <div 
+          ref={filtersRef}
+          className={`flex flex-wrap justify-center gap-3 mb-12 ${filtersVisible ? 'scroll-swing-in' : 'scroll-hidden'}`}
+        >
+          {categories.map((category, index) => (
             <button
               key={category}
               onClick={() => setActiveCategory(category)}
-              className={`px-4 py-2 font-mono text-xs uppercase tracking-wider border rounded-lg transition-all duration-300 ${
+              className={`px-4 py-2 font-mono text-xs uppercase tracking-wider border rounded-lg transition-all duration-300 hover:scale-105 ${
                 activeCategory === category
                   ? 'bg-primary/20 text-primary border-primary/50 shadow-glow-sm'
                   : 'border-border/50 text-muted-foreground hover:border-primary/30 hover:text-foreground'
               }`}
+              style={{ animationDelay: `${index * 50}ms` }}
             >
               {category}
             </button>
           ))}
         </div>
 
-        {/* Skills grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        {/* Skills grid with morph animations */}
+        <div ref={gridRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filteredSkills.map((skill, index) => (
             <div
               key={skill.name}
-              className={`glass-card p-5 group cursor-default ${isVisible ? 'animate-slideUp' : 'opacity-0'}`}
-              style={{ animationDelay: `${index * 0.1}s` }}
+              className={`glass-card p-5 group cursor-default ${gridVisible ? 'scroll-morph-in' : 'scroll-hidden'}`}
+              style={getItemAnimationStyle(index)}
               onMouseEnter={() => setHoveredSkill(skill.name)}
               onMouseLeave={() => setHoveredSkill(null)}
             >
@@ -105,35 +101,49 @@ const SkillsSection = () => {
                 <h3 className="font-display text-lg font-semibold text-foreground group-hover:text-primary transition-colors">
                   {skill.name}
                 </h3>
-                <span className="font-mono text-sm text-primary">
+                <span className={`font-mono text-sm transition-all duration-300 ${
+                  hoveredSkill === skill.name ? 'text-primary scale-110' : 'text-primary/70'
+                }`}>
                   {skill.proficiency}%
                 </span>
               </div>
 
-              {/* Progress bar */}
+              {/* Progress bar with glow effect */}
               <div className="h-2 bg-muted/50 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-gradient-to-r from-primary to-secondary rounded-full transition-all duration-1000 ease-out"
                   style={{
-                    width: isVisible ? `${skill.proficiency}%` : '0%',
-                    transitionDelay: `${index * 0.1 + 0.5}s`,
-                    boxShadow: hoveredSkill === skill.name ? '0 0 20px hsl(var(--primary) / 0.5)' : 'none',
+                    width: gridVisible ? `${skill.proficiency}%` : '0%',
+                    transitionDelay: `${index * 80 + 300}ms`,
+                    boxShadow: hoveredSkill === skill.name 
+                      ? '0 0 20px hsl(var(--primary) / 0.6), 0 0 40px hsl(var(--primary) / 0.3)' 
+                      : 'none',
                   }}
                 />
               </div>
 
               {/* Category tag */}
               <div className="mt-3">
-                <span className="font-mono text-xs text-muted-foreground">
+                <span className="font-mono text-xs text-muted-foreground group-hover:text-primary/60 transition-colors">
                   {skill.category}
                 </span>
               </div>
+
+              {/* Hover ripple effect */}
+              <div 
+                className={`absolute inset-0 rounded-xl bg-primary/5 transition-opacity duration-300 ${
+                  hoveredSkill === skill.name ? 'opacity-100' : 'opacity-0'
+                }`}
+              />
             </div>
           ))}
         </div>
 
-        {/* Additional info */}
-        <div className={`mt-16 text-center ${isVisible ? 'animate-fadeIn animation-delay-600' : 'opacity-0'}`}>
+        {/* Additional info with glow trail animation */}
+        <div 
+          ref={footerRef}
+          className={`mt-16 text-center ${footerVisible ? 'scroll-glow-trail' : 'scroll-hidden'}`}
+        >
           <p className="font-mono text-sm text-muted-foreground">
             And many more technologies explored and mastered over the years...
           </p>

@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { ExternalLink, Github, ChevronRight } from 'lucide-react';
+import { useScrollAnimation, useStaggerAnimation } from '@/hooks/useScrollAnimation';
 
 interface Project {
   id: string;
@@ -53,31 +54,17 @@ const demoProjects: Project[] = [
 ];
 
 const ProjectsSection = () => {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const [isVisible, setIsVisible] = useState(false);
+  const { ref: headerRef, isVisible: headerVisible } = useScrollAnimation({ threshold: 0.2 });
+  const { ref: gridRef, isVisible: gridVisible, getItemAnimationStyle } = useStaggerAnimation(demoProjects.length, { 
+    threshold: 0.05,
+    staggerDelay: 150 
+  });
+  const { ref: buttonRef, isVisible: buttonVisible } = useScrollAnimation({ threshold: 0.5 });
   const [hoveredProject, setHoveredProject] = useState<string | null>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
-    }
-
-    return () => observer.disconnect();
-  }, []);
 
   return (
     <section
       id="projects"
-      ref={sectionRef}
       className="relative py-24 md:py-32 overflow-hidden"
     >
       {/* Background */}
@@ -85,8 +72,11 @@ const ProjectsSection = () => {
       <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-secondary/5 rounded-full blur-[150px]" />
 
       <div className="container mx-auto px-4 relative z-10">
-        {/* Section header */}
-        <div className={`text-center mb-16 ${isVisible ? 'animate-fadeIn' : 'opacity-0'}`}>
+        {/* Section header with glitch animation */}
+        <div 
+          ref={headerRef}
+          className={`text-center mb-16 ${headerVisible ? 'scroll-glitch-in' : 'scroll-hidden'}`}
+        >
           <span className="font-mono text-xs uppercase tracking-[0.3em] text-primary mb-4 block">
             // Portfolio
           </span>
@@ -98,31 +88,38 @@ const ProjectsSection = () => {
           </p>
         </div>
 
-        {/* Projects grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Projects grid with zoom-in animations */}
+        <div ref={gridRef} className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {demoProjects.map((project, index) => (
             <div
               key={project.id}
               className={`group relative glass-card overflow-hidden ${
                 project.featured ? 'lg:col-span-1' : ''
-              } ${isVisible ? 'animate-slideUp' : 'opacity-0'}`}
-              style={{ animationDelay: `${index * 0.15}s` }}
+              } ${gridVisible ? 'scroll-zoom-in' : 'scroll-hidden'}`}
+              style={getItemAnimationStyle(index)}
               onMouseEnter={() => setHoveredProject(project.id)}
               onMouseLeave={() => setHoveredProject(null)}
             >
-              {/* Image */}
+              {/* Image with enhanced parallax effect */}
               <div className="relative h-64 overflow-hidden">
                 <img
                   src={project.image}
                   alt={project.title}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:rotate-1"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-card via-card/50 to-transparent" />
                 
                 {/* Overlay on hover */}
                 <div
-                  className={`absolute inset-0 bg-primary/10 backdrop-blur-sm transition-opacity duration-300 ${
+                  className={`absolute inset-0 bg-primary/10 backdrop-blur-sm transition-all duration-500 ${
                     hoveredProject === project.id ? 'opacity-100' : 'opacity-0'
+                  }`}
+                />
+                
+                {/* Shimmer effect */}
+                <div 
+                  className={`absolute inset-0 bg-gradient-to-r from-transparent via-primary/20 to-transparent -translate-x-full transition-transform duration-700 ${
+                    hoveredProject === project.id ? 'translate-x-full' : ''
                   }`}
                 />
               </div>
@@ -131,7 +128,7 @@ const ProjectsSection = () => {
               <div className="relative p-6">
                 {/* Featured badge */}
                 {project.featured && (
-                  <span className="absolute top-4 right-4 px-2 py-1 text-xs font-mono uppercase tracking-wider bg-primary/20 text-primary border border-primary/30 rounded">
+                  <span className="absolute top-4 right-4 px-2 py-1 text-xs font-mono uppercase tracking-wider bg-primary/20 text-primary border border-primary/30 rounded animate-pulse">
                     Featured
                   </span>
                 )}
@@ -144,12 +141,13 @@ const ProjectsSection = () => {
                   {project.description}
                 </p>
 
-                {/* Technologies */}
+                {/* Technologies with stagger animation on hover */}
                 <div className="flex flex-wrap gap-2 mb-6">
-                  {project.technologies.map((tech) => (
+                  {project.technologies.map((tech, techIndex) => (
                     <span
                       key={tech}
-                      className="px-2 py-1 text-xs font-mono bg-muted/50 text-muted-foreground border border-border/50 rounded"
+                      className="px-2 py-1 text-xs font-mono bg-muted/50 text-muted-foreground border border-border/50 rounded transition-all duration-300 group-hover:border-primary/30 group-hover:text-foreground"
+                      style={{ transitionDelay: `${techIndex * 50}ms` }}
                     >
                       {tech}
                     </span>
@@ -161,7 +159,7 @@ const ProjectsSection = () => {
                   {project.liveUrl && (
                     <a
                       href={project.liveUrl}
-                      className="flex items-center gap-2 text-sm font-mono text-primary hover:text-primary/80 transition-colors"
+                      className="flex items-center gap-2 text-sm font-mono text-primary hover:text-primary/80 transition-all duration-300 hover:translate-x-1"
                     >
                       <ExternalLink className="w-4 h-4" />
                       Live Demo
@@ -170,7 +168,7 @@ const ProjectsSection = () => {
                   {project.githubUrl && (
                     <a
                       href={project.githubUrl}
-                      className="flex items-center gap-2 text-sm font-mono text-muted-foreground hover:text-foreground transition-colors"
+                      className="flex items-center gap-2 text-sm font-mono text-muted-foreground hover:text-foreground transition-all duration-300 hover:translate-x-1"
                     >
                       <Github className="w-4 h-4" />
                       Source
@@ -181,19 +179,24 @@ const ProjectsSection = () => {
 
               {/* Hover border glow */}
               <div
-                className={`absolute inset-0 rounded-xl border-2 border-primary/0 transition-all duration-300 pointer-events-none ${
-                  hoveredProject === project.id ? 'border-primary/50 shadow-glow-sm' : ''
+                className={`absolute inset-0 rounded-xl border-2 transition-all duration-500 pointer-events-none ${
+                  hoveredProject === project.id 
+                    ? 'border-primary/50 shadow-glow-md' 
+                    : 'border-transparent'
                 }`}
               />
             </div>
           ))}
         </div>
 
-        {/* View all button */}
-        <div className={`text-center mt-12 ${isVisible ? 'animate-fadeIn animation-delay-600' : 'opacity-0'}`}>
-          <button className="cyber-button inline-flex items-center gap-2">
+        {/* View all button with bounce animation */}
+        <div 
+          ref={buttonRef}
+          className={`text-center mt-12 ${buttonVisible ? 'scroll-bounce-in' : 'scroll-hidden'}`}
+        >
+          <button className="cyber-button inline-flex items-center gap-2 group">
             View All Projects
-            <ChevronRight className="w-4 h-4" />
+            <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
           </button>
         </div>
       </div>
