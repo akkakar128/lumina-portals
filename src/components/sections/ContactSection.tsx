@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Mail, MapPin, Github, Linkedin, Twitter, Send } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const ContactSection = () => {
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -10,6 +12,23 @@ const ContactSection = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+        }
+      },
+      { threshold: 0.2 }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,6 +55,7 @@ const ContactSection = () => {
   return (
     <section
       id="contact"
+      ref={sectionRef}
       className="relative py-24 md:py-32 overflow-hidden"
     >
       {/* Background */}
@@ -44,7 +64,7 @@ const ContactSection = () => {
 
       <div className="container mx-auto px-4 relative z-10">
         {/* Section header */}
-        <div className="text-center mb-16 scroll-section-header">
+        <div className={`text-center mb-16 ${isVisible ? 'animate-fadeIn' : 'opacity-0'}`}>
           <span className="font-mono text-xs uppercase tracking-[0.3em] text-primary mb-4 block">
             // Contact
           </span>
@@ -58,7 +78,7 @@ const ContactSection = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
           {/* Contact info */}
-          <div className="scroll-slide-left">
+          <div className={`${isVisible ? 'animate-slideUp' : 'opacity-0'}`}>
             <div className="glass-card p-8 h-full">
               <h3 className="font-display text-2xl font-bold mb-8 text-foreground">
                 Get in Touch
@@ -115,7 +135,7 @@ const ContactSection = () => {
           </div>
 
           {/* Contact form */}
-          <div className="scroll-slide-right">
+          <div className={`${isVisible ? 'animate-slideUp animation-delay-200' : 'opacity-0'}`}>
             <form onSubmit={handleSubmit} className="glass-card p-8">
               <h3 className="font-display text-2xl font-bold mb-8 text-foreground">
                 Send a Message
