@@ -590,128 +590,155 @@
 
   /* ============ SCROLL-DRIVEN ANIMATIONS ============ */
   
-  /* Fade up animation keyframes */
+  /* Dramatic scroll-driven animations */
   @keyframes scrollFadeUp {
     from {
       opacity: 0;
-      transform: translateY(60px) scale(0.95);
+      transform: translateY(120px) scale(0.5);
+      filter: blur(10px);
     }
     to {
       opacity: 1;
       transform: translateY(0) scale(1);
+      filter: blur(0);
     }
   }
 
   @keyframes scrollFadeIn {
     from {
       opacity: 0;
-      transform: scale(0.9);
+      transform: scale(0.4) rotate(-8deg);
+      filter: blur(12px);
     }
     to {
       opacity: 1;
-      transform: scale(1);
+      transform: scale(1) rotate(0deg);
+      filter: blur(0);
     }
   }
 
   @keyframes scrollSlideLeft {
     from {
       opacity: 0;
-      transform: translateX(-80px);
+      transform: translateX(-180px) rotate(-15deg);
+      filter: blur(10px);
     }
     to {
       opacity: 1;
-      transform: translateX(0);
+      transform: translateX(0) rotate(0deg);
+      filter: blur(0);
     }
   }
 
   @keyframes scrollSlideRight {
     from {
       opacity: 0;
-      transform: translateX(80px);
+      transform: translateX(180px) rotate(15deg);
+      filter: blur(10px);
     }
     to {
       opacity: 1;
-      transform: translateX(0);
+      transform: translateX(0) rotate(0deg);
+      filter: blur(0);
     }
   }
 
   @keyframes scrollGlow {
     from {
       opacity: 0;
-      filter: blur(10px);
-      transform: scale(0.8);
+      filter: blur(25px) brightness(2.5);
+      transform: scale(0.4);
     }
     to {
       opacity: 1;
-      filter: blur(0);
+      filter: blur(0) brightness(1);
       transform: scale(1);
     }
   }
 
-  /* Scroll-driven animation classes */
+  @keyframes scrollRotateIn {
+    from {
+      opacity: 0;
+      transform: perspective(1200px) rotateX(-60deg) translateY(100px);
+      filter: blur(8px);
+    }
+    to {
+      opacity: 1;
+      transform: perspective(1200px) rotateX(0deg) translateY(0);
+      filter: blur(0);
+    }
+  }
+
+  /* Scroll-driven animation classes - Extended ranges */
   .scroll-fade-up {
-    animation: scrollFadeUp linear both;
+    animation: scrollFadeUp ease-out both;
     animation-timeline: view();
-    animation-range: entry 0% cover 40%;
+    animation-range: entry 0% cover 55%;
   }
 
   .scroll-fade-in {
-    animation: scrollFadeIn linear both;
-    animation-timeline: view();
-    animation-range: entry 0% cover 35%;
-  }
-
-  .scroll-slide-left {
-    animation: scrollSlideLeft linear both;
-    animation-timeline: view();
-    animation-range: entry 0% cover 40%;
-  }
-
-  .scroll-slide-right {
-    animation: scrollSlideRight linear both;
-    animation-timeline: view();
-    animation-range: entry 0% cover 40%;
-  }
-
-  .scroll-glow {
-    animation: scrollGlow linear both;
+    animation: scrollFadeIn ease-out both;
     animation-timeline: view();
     animation-range: entry 0% cover 50%;
   }
 
-  /* Staggered scroll animation delays using animation-delay workaround */
+  .scroll-slide-left {
+    animation: scrollSlideLeft ease-out both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 60%;
+  }
+
+  .scroll-slide-right {
+    animation: scrollSlideRight ease-out both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 60%;
+  }
+
+  .scroll-glow {
+    animation: scrollGlow ease-out both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 65%;
+  }
+
+  .scroll-rotate-in {
+    animation: scrollRotateIn ease-out both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 55%;
+  }
+
+  /* Staggered scroll animation delays */
   .scroll-delay-1 {
-    animation-range: entry 5% cover 45%;
+    animation-range: entry 8% cover 60%;
   }
 
   .scroll-delay-2 {
-    animation-range: entry 10% cover 50%;
+    animation-range: entry 16% cover 65%;
   }
 
   .scroll-delay-3 {
-    animation-range: entry 15% cover 55%;
+    animation-range: entry 24% cover 70%;
   }
 
   .scroll-delay-4 {
-    animation-range: entry 20% cover 60%;
+    animation-range: entry 32% cover 75%;
   }
 
   /* Section-level scroll animations */
   .scroll-section-header {
-    animation: scrollFadeUp linear both;
-    animation-timeline: view();
-    animation-range: entry 0% cover 30%;
-  }
-
-  .scroll-card {
-    animation: scrollFadeUp linear both;
+    animation: scrollFadeUp ease-out both;
     animation-timeline: view();
     animation-range: entry 0% cover 45%;
   }
 
-  .scroll-stats {
-    animation: scrollFadeIn linear both;
+  .scroll-card {
+    animation: scrollRotateIn ease-out both;
     animation-timeline: view();
-    animation-range: entry 10% cover 50%;
+    animation-range: entry 0% cover 60%;
+  }
+
+  .scroll-stats {
+    animation: scrollGlow ease-out both;
+    animation-timeline: view();
+    animation-range: entry 10% cover 65%;
   }
 }
