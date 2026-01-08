@@ -43,15 +43,15 @@ const Navigation = () => {
           {/* Logo with Profile */}
           <Link
             to="/"
-            className="flex items-center gap-3 group"
+            className="flex items-center gap-2 md:gap-3 group shrink-0"
           >
-            <Avatar className="h-9 w-9 md:h-10 md:w-10 ring-2 ring-primary/30 group-hover:ring-primary/60 transition-all duration-300">
+            <Avatar className="h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10 ring-2 ring-primary/30 group-hover:ring-primary/60 transition-all duration-300 shrink-0">
               <AvatarImage src={OWNER_DATA.avatarUrl} alt={OWNER_DATA.name} />
-              <AvatarFallback className="bg-primary/20 text-primary font-display font-bold">
+              <AvatarFallback className="bg-primary/20 text-primary font-display font-bold text-xs sm:text-sm">
                 {OWNER_DATA.name.split(' ').map(n => n[0]).join('')}
               </AvatarFallback>
             </Avatar>
-            <span className="font-display text-lg md:text-xl font-bold tracking-wide text-foreground group-hover:text-primary transition-colors duration-300">
+            <span className="font-display text-sm sm:text-base md:text-lg lg:text-xl font-bold tracking-wide text-foreground group-hover:text-primary transition-colors duration-300 truncate max-w-[120px] sm:max-w-[150px] md:max-w-[200px] lg:max-w-none">
               {OWNER_DATA.name}
             </span>
           </Link>
