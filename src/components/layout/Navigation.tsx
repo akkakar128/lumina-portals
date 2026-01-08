@@ -1,6 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+
+// Dummy data - will be replaced with data from dashboard/database
+const OWNER_DATA = {
+  name: "Alex Morgan",
+  avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"
+};
 
 const Navigation = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -33,12 +40,20 @@ const Navigation = () => {
     >
       <div className="container mx-auto px-4 md:px-6">
         <div className="flex items-center justify-between h-16 md:h-20">
-          {/* Logo */}
+          {/* Logo with Profile */}
           <Link
             to="/"
-            className="font-display text-xl md:text-2xl font-bold tracking-wider text-neon hover:animate-glitch"
+            className="flex items-center gap-3 group"
           >
-            PORTFOLIO_
+            <Avatar className="h-9 w-9 md:h-10 md:w-10 ring-2 ring-primary/30 group-hover:ring-primary/60 transition-all duration-300">
+              <AvatarImage src={OWNER_DATA.avatarUrl} alt={OWNER_DATA.name} />
+              <AvatarFallback className="bg-primary/20 text-primary font-display font-bold">
+                {OWNER_DATA.name.split(' ').map(n => n[0]).join('')}
+              </AvatarFallback>
+            </Avatar>
+            <span className="font-display text-lg md:text-xl font-bold tracking-wide text-foreground group-hover:text-primary transition-colors duration-300">
+              {OWNER_DATA.name}
+            </span>
           </Link>
 
           {/* Desktop Navigation */}
