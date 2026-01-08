@@ -24,11 +24,13 @@ const Navigation = () => {
   }, []);
 
   const navLinks = [
-    { href: '#about', label: 'About' },
-    { href: '#projects', label: 'Projects' },
-    { href: '#skills', label: 'Skills' },
-    { href: '#contact', label: 'Contact' },
+    { href: '/about', label: 'About' },
+    { href: '/projects', label: 'Projects' },
+    { href: '/skills', label: 'Skills' },
+    { href: '/contact', label: 'Contact' },
   ];
+
+  const isActive = (href: string) => location.pathname === href;
 
   return (
     <nav
@@ -59,14 +61,20 @@ const Navigation = () => {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
             {navLinks.map((link) => (
-              <a
+              <Link
                 key={link.href}
-                href={link.href}
-                className="relative font-mono text-sm uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors duration-300 group"
+                to={link.href}
+                className={`relative font-mono text-sm uppercase tracking-widest transition-colors duration-300 group ${
+                  isActive(link.href) 
+                    ? 'text-primary' 
+                    : 'text-muted-foreground hover:text-primary'
+                }`}
               >
                 {link.label}
-                <span className="absolute -bottom-1 left-0 w-0 h-px bg-primary transition-all duration-300 group-hover:w-full" />
-              </a>
+                <span className={`absolute -bottom-1 left-0 h-px bg-primary transition-all duration-300 ${
+                  isActive(link.href) ? 'w-full' : 'w-0 group-hover:w-full'
+                }`} />
+              </Link>
             ))}
           </div>
 
@@ -84,15 +92,19 @@ const Navigation = () => {
           <div className="md:hidden absolute top-full left-0 right-0 bg-background/95 backdrop-blur-xl border-b border-border/30 animate-slideUp">
             <div className="flex flex-col py-4">
               {navLinks.map((link, index) => (
-                <a
+                <Link
                   key={link.href}
-                  href={link.href}
+                  to={link.href}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="px-4 py-3 font-mono text-sm uppercase tracking-widest text-muted-foreground hover:text-primary hover:bg-muted/50 transition-all duration-300"
+                  className={`px-4 py-3 font-mono text-sm uppercase tracking-widest transition-all duration-300 ${
+                    isActive(link.href)
+                      ? 'text-primary bg-primary/10'
+                      : 'text-muted-foreground hover:text-primary hover:bg-muted/50'
+                  }`}
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
                   {link.label}
-                </a>
+                </Link>
               ))}
             </div>
           </div>
