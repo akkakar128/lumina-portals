@@ -382,90 +382,26 @@
     pointer-events: none;
   }
 
-  /* Neon text - refined professional glow */
+  /* Neon text */
   .text-neon {
-    @apply text-primary relative;
-    text-shadow: 
-      0 0 4px hsl(var(--primary) / 0.9),
-      0 0 8px hsl(var(--primary) / 0.7),
-      0 0 16px hsl(var(--primary) / 0.5),
-      0 0 32px hsl(var(--primary) / 0.3),
-      0 0 48px hsl(var(--primary) / 0.15);
-    background: linear-gradient(
-      135deg,
-      hsl(var(--primary)) 0%,
-      hsl(var(--primary) / 0.9) 25%,
-      hsl(var(--secondary) / 0.8) 50%,
-      hsl(var(--primary) / 0.9) 75%,
-      hsl(var(--primary)) 100%
-    );
-    background-size: 200% 200%;
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: neonShimmer 4s ease-in-out infinite;
-    filter: drop-shadow(0 0 6px hsl(var(--primary) / 0.6)) 
-            drop-shadow(0 0 12px hsl(var(--primary) / 0.4))
-            drop-shadow(0 0 24px hsl(var(--primary) / 0.2));
-  }
-
-  @keyframes neonShimmer {
-    0%, 100% { 
-      background-position: 0% 50%;
-      filter: drop-shadow(0 0 6px hsl(var(--primary) / 0.6)) 
-              drop-shadow(0 0 12px hsl(var(--primary) / 0.4))
-              drop-shadow(0 0 24px hsl(var(--primary) / 0.2));
-    }
-    50% { 
-      background-position: 100% 50%;
-      filter: drop-shadow(0 0 8px hsl(var(--primary) / 0.7)) 
-              drop-shadow(0 0 16px hsl(var(--primary) / 0.5))
-              drop-shadow(0 0 32px hsl(var(--primary) / 0.3));
-    }
+    @apply text-primary;
+    text-shadow: 0 0 10px hsl(var(--primary) / 0.8), 
+                 0 0 20px hsl(var(--primary) / 0.6), 
+                 0 0 40px hsl(var(--primary) / 0.4);
   }
 
   .text-neon-secondary {
-    @apply text-secondary relative;
-    text-shadow: 
-      0 0 4px hsl(var(--secondary) / 0.9),
-      0 0 8px hsl(var(--secondary) / 0.6),
-      0 0 16px hsl(var(--secondary) / 0.4),
-      0 0 32px hsl(var(--secondary) / 0.2);
-    background: linear-gradient(
-      135deg,
-      hsl(var(--secondary)) 0%,
-      hsl(var(--accent) / 0.8) 50%,
-      hsl(var(--secondary)) 100%
-    );
-    background-size: 200% 200%;
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: neonShimmer 4s ease-in-out infinite;
-    filter: drop-shadow(0 0 6px hsl(var(--secondary) / 0.5)) 
-            drop-shadow(0 0 12px hsl(var(--secondary) / 0.3));
+    @apply text-secondary;
+    text-shadow: 0 0 10px hsl(var(--secondary) / 0.8), 
+                 0 0 20px hsl(var(--secondary) / 0.6), 
+                 0 0 40px hsl(var(--secondary) / 0.4);
   }
 
   .text-neon-accent {
-    @apply text-accent relative;
-    text-shadow: 
-      0 0 4px hsl(var(--accent) / 0.9),
-      0 0 8px hsl(var(--accent) / 0.6),
-      0 0 16px hsl(var(--accent) / 0.4),
-      0 0 32px hsl(var(--accent) / 0.2);
-    background: linear-gradient(
-      135deg,
-      hsl(var(--accent)) 0%,
-      hsl(var(--primary) / 0.8) 50%,
-      hsl(var(--accent)) 100%
-    );
-    background-size: 200% 200%;
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: neonShimmer 4s ease-in-out infinite;
-    filter: drop-shadow(0 0 6px hsl(var(--accent) / 0.5)) 
-            drop-shadow(0 0 12px hsl(var(--accent) / 0.3));
+    @apply text-accent;
+    text-shadow: 0 0 10px hsl(var(--accent) / 0.8), 
+                 0 0 20px hsl(var(--accent) / 0.6), 
+                 0 0 40px hsl(var(--accent) / 0.4);
   }
 
   /* Glowing border */
