@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import Scene3D from '../3d/Scene3D';
 import { ChevronDown } from 'lucide-react';
 
@@ -90,28 +91,28 @@ const HeroSection = ({
 
           {/* CTA Buttons with bounce-in */}
           <div className={`flex flex-col sm:flex-row items-center justify-center gap-4 ${isLoaded ? 'scroll-bounce-in' : 'scroll-hidden'}`} style={{ animationDelay: '800ms' }}>
-            <a href="#projects" className="cyber-button group">
+            <Link to="/projects" className="cyber-button group">
               <span className="relative z-10">View Projects</span>
-            </a>
-            <a
-              href="#contact"
+            </Link>
+            <Link
+              to="/contact"
               className="px-8 py-3 font-display font-semibold uppercase tracking-widest border border-muted-foreground/30 text-foreground hover:border-primary hover:text-primary hover:shadow-glow-sm transition-all duration-300"
             >
               Contact Me
-            </a>
+            </Link>
           </div>
         </div>
       </div>
 
       {/* Scroll indicator with float animation */}
-      <div className={`absolute bottom-8 left-1/2 -translate-x-1/2 z-20 ${isLoaded ? 'scroll-fade-up' : 'scroll-hidden'}`} style={{ animationDelay: '1000ms' }}>
-        <a
-          href="#about"
+      <div className={`absolute bottom-20 left-1/2 -translate-x-1/2 z-20 ${isLoaded ? 'scroll-fade-up' : 'scroll-hidden'}`} style={{ animationDelay: '1000ms' }}>
+        <Link
+          to="/about"
           className="flex flex-col items-center gap-2 text-muted-foreground hover:text-primary transition-colors group"
         >
-          <span className="font-mono text-xs uppercase tracking-widest">Scroll</span>
+          <span className="font-mono text-xs uppercase tracking-widest">Explore</span>
           <ChevronDown className="w-5 h-5 animate-bounce group-hover:text-primary" />
-        </a>
+        </Link>
       </div>
 
       {/* Corner decorations with staggered animations */}
