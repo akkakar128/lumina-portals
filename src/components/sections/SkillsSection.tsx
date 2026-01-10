@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useScrollAnimation, useStaggerAnimation } from '@/hooks/useScrollAnimation';
+import AnimatedTitle from '../AnimatedTitle';
 
 interface Skill {
   name: string;
@@ -50,7 +51,7 @@ const SkillsSection = () => {
       <div className="absolute bottom-0 left-1/4 w-[500px] h-[500px] bg-accent/5 rounded-full blur-[150px]" />
 
       <div className="container mx-auto px-4 relative z-10">
-        {/* Section header with fade-down animation */}
+        {/* Section header with 3D animated title */}
         <div 
           ref={headerRef}
           className={`text-center mb-16 ${headerVisible ? 'scroll-fade-down' : 'scroll-hidden'}`}
@@ -58,9 +59,13 @@ const SkillsSection = () => {
           <span className="font-mono text-xs uppercase tracking-[0.3em] text-primary mb-4 block">
             // Expertise
           </span>
-          <h2 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
-            Technical <span className="text-neon">Skills</span>
-          </h2>
+          <div className="mb-6">
+            <AnimatedTitle 
+              text="TECHNICAL SKILLS" 
+              as="h2"
+              className="text-4xl md:text-5xl lg:text-6xl"
+            />
+          </div>
           <p className="font-mono text-muted-foreground max-w-2xl mx-auto">
             Continuously learning and mastering new technologies to stay at the cutting edge.
           </p>

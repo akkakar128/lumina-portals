@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Mail, MapPin, Github, Linkedin, Twitter, Send } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
+import AnimatedTitle from '../AnimatedTitle';
 
 const ContactSection = () => {
   const { ref: headerRef, isVisible: headerVisible } = useScrollAnimation({ threshold: 0.2 });
@@ -48,7 +49,7 @@ const ContactSection = () => {
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[200px]" />
 
       <div className="container mx-auto px-4 relative z-10">
-        {/* Section header with parallax float animation */}
+        {/* Section header with 3D animated title */}
         <div 
           ref={headerRef}
           className={`text-center mb-16 ${headerVisible ? 'scroll-parallax-float' : 'scroll-hidden'}`}
@@ -56,9 +57,13 @@ const ContactSection = () => {
           <span className="font-mono text-xs uppercase tracking-[0.3em] text-primary mb-4 block">
             // Contact
           </span>
-          <h2 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
-            Let's <span className="text-neon">Connect</span>
-          </h2>
+          <div className="mb-6">
+            <AnimatedTitle 
+              text="LET'S CONNECT" 
+              as="h2"
+              className="text-4xl md:text-5xl lg:text-6xl"
+            />
+          </div>
           <p className="font-mono text-muted-foreground max-w-2xl mx-auto">
             Have a project in mind or just want to chat? I'm always open to new opportunities and collaborations.
           </p>

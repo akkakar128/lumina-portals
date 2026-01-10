@@ -955,4 +955,255 @@
   .animation-delay-600 { animation-delay: 0.6s; }
   .animation-delay-700 { animation-delay: 0.7s; }
   .animation-delay-800 { animation-delay: 0.8s; }
+
+  /* ===== 3D ANIMATED TITLE STYLES ===== */
+  .perspective-1000 {
+    perspective: 1000px;
+    perspective-origin: center center;
+  }
+
+  .animated-title-3d {
+    position: relative;
+    display: inline-block;
+    transform-style: preserve-3d;
+  }
+
+  .animated-title-wrapper {
+    display: inline-block;
+    transform-style: preserve-3d;
+  }
+
+  .animated-letter {
+    display: inline-block;
+    transform-style: preserve-3d;
+    opacity: 0;
+    transform: rotateX(-90deg) rotateY(-15deg) translateZ(-50px) scale(0.5);
+    filter: blur(10px);
+    transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .animated-letter.letter-animate {
+    animation: letterEntrance3D 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+
+  @keyframes letterEntrance3D {
+    0% {
+      opacity: 0;
+      transform: rotateX(-90deg) rotateY(-25deg) translateZ(-100px) scale(0.3);
+      filter: blur(15px);
+      text-shadow: 
+        0 0 0 transparent,
+        0 0 0 transparent;
+    }
+    30% {
+      opacity: 0.6;
+      filter: blur(5px);
+    }
+    60% {
+      transform: rotateX(15deg) rotateY(5deg) translateZ(30px) scale(1.1);
+      filter: blur(0);
+    }
+    80% {
+      transform: rotateX(-5deg) rotateY(-2deg) translateZ(10px) scale(1.02);
+    }
+    100% {
+      opacity: 1;
+      transform: rotateX(0deg) rotateY(0deg) translateZ(0px) scale(1);
+      filter: blur(0);
+      text-shadow: 
+        0 0 30px hsl(var(--primary) / 0.5),
+        0 0 60px hsl(var(--primary) / 0.3),
+        0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+  }
+
+  /* 3D Shadow layers */
+  .animated-title-shadow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: inline-block;
+    pointer-events: none;
+    opacity: 0;
+    white-space: nowrap;
+  }
+
+  .shadow-layer-1 {
+    color: hsl(var(--primary) / 0.15);
+    transform: translateZ(-20px) translateY(3px) translateX(3px);
+  }
+
+  .shadow-layer-2 {
+    color: hsl(var(--primary) / 0.08);
+    transform: translateZ(-40px) translateY(6px) translateX(6px);
+  }
+
+  .shadow-layer-1.shadow-animate {
+    animation: shadowLayerIn1 1s ease-out 0.3s forwards;
+  }
+
+  .shadow-layer-2.shadow-animate {
+    animation: shadowLayerIn2 1.2s ease-out 0.4s forwards;
+  }
+
+  @keyframes shadowLayerIn1 {
+    0% {
+      opacity: 0;
+      transform: translateZ(-80px) translateY(20px) translateX(20px) scale(0.8);
+    }
+    100% {
+      opacity: 1;
+      transform: translateZ(-20px) translateY(3px) translateX(3px) scale(1);
+    }
+  }
+
+  @keyframes shadowLayerIn2 {
+    0% {
+      opacity: 0;
+      transform: translateZ(-120px) translateY(40px) translateX(40px) scale(0.6);
+    }
+    100% {
+      opacity: 1;
+      transform: translateZ(-40px) translateY(6px) translateX(6px) scale(1);
+    }
+  }
+
+  /* Glow effect */
+  .animated-title-glow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    filter: blur(20px);
+    color: hsl(var(--primary));
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  .animated-title-glow.glow-animate {
+    animation: glowEntrance 1.5s ease-out 0.5s forwards, glowPulse3D 3s ease-in-out 2s infinite;
+  }
+
+  @keyframes glowEntrance {
+    0% {
+      opacity: 0;
+      filter: blur(40px);
+      transform: scale(0.8);
+    }
+    50% {
+      opacity: 0.8;
+    }
+    100% {
+      opacity: 0.4;
+      filter: blur(20px);
+      transform: scale(1);
+    }
+  }
+
+  @keyframes glowPulse3D {
+    0%, 100% {
+      opacity: 0.4;
+      filter: blur(20px);
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.7;
+      filter: blur(25px);
+      transform: scale(1.02);
+    }
+  }
+
+  /* Reflection effect */
+  .animated-title-reflection {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    opacity: 0;
+    transform: scaleY(-1) translateY(-10px);
+    mask-image: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 50%);
+    -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 50%);
+    pointer-events: none;
+    white-space: nowrap;
+    color: hsl(var(--primary) / 0.3);
+  }
+
+  .animated-title-reflection.reflection-animate {
+    animation: reflectionIn 1s ease-out 0.8s forwards;
+  }
+
+  @keyframes reflectionIn {
+    0% {
+      opacity: 0;
+      transform: scaleY(-1) translateY(-30px) scaleX(0.8);
+    }
+    100% {
+      opacity: 1;
+      transform: scaleY(-1) translateY(-10px) scaleX(1);
+    }
+  }
+
+  /* Pre-animation state */
+  .pre-animation .animated-letter {
+    opacity: 0;
+    transform: rotateX(-90deg) rotateY(-15deg) translateZ(-50px) scale(0.5);
+    filter: blur(10px);
+  }
+
+  /* Wrapper animation for overall entrance */
+  .animate-3d-entrance {
+    animation: wrapper3DEntrance 0.6s ease-out forwards;
+  }
+
+  @keyframes wrapper3DEntrance {
+    0% {
+      transform: perspective(1000px) rotateX(-10deg) translateY(30px);
+      opacity: 0;
+    }
+    100% {
+      transform: perspective(1000px) rotateX(0deg) translateY(0);
+      opacity: 1;
+    }
+  }
+
+  /* Hover effects for letters */
+  .animated-title-3d:hover .animated-letter {
+    animation: letterHover3D 0.4s ease-out forwards;
+  }
+
+  @keyframes letterHover3D {
+    0% {
+      transform: translateZ(0);
+    }
+    50% {
+      transform: translateZ(20px) rotateY(calc(var(--letter-index) * 2deg - 10deg));
+    }
+    100% {
+      transform: translateZ(10px);
+      text-shadow: 
+        0 0 40px hsl(var(--primary) / 0.7),
+        0 0 80px hsl(var(--primary) / 0.4),
+        0 10px 20px rgba(0, 0, 0, 0.4);
+    }
+  }
+
+  /* Continuous subtle animation after entrance */
+  .animated-letter.letter-animate {
+    animation: letterEntrance3D 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+               letterFloat 4s ease-in-out 1s infinite;
+  }
+
+  @keyframes letterFloat {
+    0%, 100% {
+      transform: translateY(0) translateZ(0);
+    }
+    25% {
+      transform: translateY(-2px) translateZ(5px);
+    }
+    50% {
+      transform: translateY(0) translateZ(8px);
+    }
+    75% {
+      transform: translateY(2px) translateZ(5px);
+    }
+  }
 }
