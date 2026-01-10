@@ -51,16 +51,58 @@ const demoProjects: Project[] = [
     liveUrl: '#',
     githubUrl: '#',
   },
+  {
+    id: '5',
+    title: 'Smart Home Automation Hub',
+    description: 'IoT control center with voice commands and predictive scheduling algorithms.',
+    image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&auto=format&fit=crop',
+    technologies: ['Node.js', 'MQTT', 'React Native', 'TensorFlow Lite'],
+    liveUrl: '#',
+    githubUrl: '#',
+  },
+  {
+    id: '6',
+    title: 'Blockchain Voting System',
+    description: 'Transparent and secure voting platform using distributed ledger technology.',
+    image: 'https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=800&auto=format&fit=crop',
+    technologies: ['Ethereum', 'Solidity', 'React', 'Web3.js'],
+    githubUrl: '#',
+  },
+  {
+    id: '7',
+    title: 'AR Navigation App',
+    description: 'Augmented reality navigation with real-time POI overlays and indoor mapping.',
+    image: 'https://images.unsplash.com/photo-1535223289827-42f1e9919769?w=800&auto=format&fit=crop',
+    technologies: ['ARKit', 'Swift', 'CoreML', 'MapKit'],
+    liveUrl: '#',
+  },
+  {
+    id: '8',
+    title: 'Real-time Collaboration Tool',
+    description: 'Multiplayer whiteboard with video chat and intelligent document editing.',
+    image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&auto=format&fit=crop',
+    technologies: ['WebRTC', 'Yjs', 'React', 'Socket.io'],
+    liveUrl: '#',
+    githubUrl: '#',
+  },
 ];
+
+const INITIAL_DISPLAY_COUNT = 4;
 
 const ProjectsSection = () => {
   const { ref: headerRef, isVisible: headerVisible } = useScrollAnimation({ threshold: 0.2 });
-  const { ref: gridRef, isVisible: gridVisible, getItemAnimationStyle } = useStaggerAnimation(demoProjects.length, { 
+  const [showAll, setShowAll] = useState(false);
+  const [hoveredProject, setHoveredProject] = useState<string | null>(null);
+  
+  const displayedProjects = showAll ? demoProjects : demoProjects.slice(0, INITIAL_DISPLAY_COUNT);
+  
+  const { ref: gridRef, isVisible: gridVisible, getItemAnimationStyle } = useStaggerAnimation(displayedProjects.length, { 
     threshold: 0.05,
     staggerDelay: 150 
   });
   const { ref: buttonRef, isVisible: buttonVisible } = useScrollAnimation({ threshold: 0.5 });
-  const [hoveredProject, setHoveredProject] = useState<string | null>(null);
+  
+  const hasMoreProjects = demoProjects.length > INITIAL_DISPLAY_COUNT;
 
   return (
     <section
@@ -90,7 +132,7 @@ const ProjectsSection = () => {
 
         {/* Projects grid with zoom-in animations */}
         <div ref={gridRef} className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {demoProjects.map((project, index) => (
+          {displayedProjects.map((project, index) => (
             <div
               key={project.id}
               className={`group relative glass-card overflow-hidden ${
@@ -190,15 +232,20 @@ const ProjectsSection = () => {
         </div>
 
         {/* View all button with bounce animation */}
-        <div 
-          ref={buttonRef}
-          className={`text-center mt-12 ${buttonVisible ? 'scroll-bounce-in' : 'scroll-hidden'}`}
-        >
-          <button className="cyber-button inline-flex items-center gap-2 group">
-            View All Projects
-            <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-          </button>
-        </div>
+        {hasMoreProjects && (
+          <div 
+            ref={buttonRef}
+            className={`text-center mt-12 ${buttonVisible ? 'scroll-bounce-in' : 'scroll-hidden'}`}
+          >
+            <button 
+              onClick={() => setShowAll(!showAll)}
+              className="cyber-button inline-flex items-center gap-2 group"
+            >
+              {showAll ? 'Show Less' : `View All Projects (${demoProjects.length - INITIAL_DISPLAY_COUNT} more)`}
+              <ChevronRight className={`w-4 h-4 transition-transform duration-300 ${showAll ? 'rotate-90' : 'group-hover:translate-x-1'}`} />
+            </button>
+          </div>
+        )}
       </div>
     </section>
   );
