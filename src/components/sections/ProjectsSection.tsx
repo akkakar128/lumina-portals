@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ExternalLink, Github, ChevronRight } from 'lucide-react';
 import { useScrollAnimation, useStaggerAnimation } from '@/hooks/useScrollAnimation';
+import AnimatedTitle from '../AnimatedTitle';
 
 interface Project {
   id: string;
@@ -114,7 +115,7 @@ const ProjectsSection = () => {
       <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-secondary/5 rounded-full blur-[150px]" />
 
       <div className="container mx-auto px-4 relative z-10">
-        {/* Section header with glitch animation */}
+        {/* Section header with 3D animated title */}
         <div 
           ref={headerRef}
           className={`text-center mb-16 ${headerVisible ? 'scroll-glitch-in' : 'scroll-hidden'}`}
@@ -122,9 +123,13 @@ const ProjectsSection = () => {
           <span className="font-mono text-xs uppercase tracking-[0.3em] text-primary mb-4 block">
             // Portfolio
           </span>
-          <h2 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
-            Featured <span className="text-neon">Projects</span>
-          </h2>
+          <div className="mb-6">
+            <AnimatedTitle 
+              text="FEATURED PROJECTS" 
+              as="h2"
+              className="text-4xl md:text-5xl lg:text-6xl"
+            />
+          </div>
           <p className="font-mono text-muted-foreground max-w-2xl mx-auto">
             A selection of my most impactful work, showcasing innovation and technical excellence.
           </p>

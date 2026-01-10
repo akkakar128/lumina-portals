@@ -1,5 +1,6 @@
 import { Code, Palette, Zap, Globe } from 'lucide-react';
 import { useScrollAnimation, useStaggerAnimation } from '@/hooks/useScrollAnimation';
+import AnimatedTitle from '../AnimatedTitle';
 
 const AboutSection = () => {
   const { ref: headerRef, isVisible: headerVisible } = useScrollAnimation({ threshold: 0.2 });
@@ -50,7 +51,7 @@ const AboutSection = () => {
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-secondary/5 rounded-full blur-[100px]" />
 
       <div className="container mx-auto px-4 relative z-10">
-        {/* Section header with blur-in animation */}
+        {/* Section header with 3D animated title */}
         <div 
           ref={headerRef}
           className={`text-center mb-16 ${headerVisible ? 'scroll-blur-in' : 'scroll-hidden'}`}
@@ -58,9 +59,13 @@ const AboutSection = () => {
           <span className="font-mono text-xs uppercase tracking-[0.3em] text-primary mb-4 block">
             // About
           </span>
-          <h2 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
-            <span className="text-neon">Who</span> I Am
-          </h2>
+          <div className="mb-6">
+            <AnimatedTitle 
+              text="WHO I AM" 
+              as="h2"
+              className="text-4xl md:text-5xl lg:text-6xl"
+            />
+          </div>
           <p className="font-mono text-muted-foreground max-w-2xl mx-auto">
             A passionate developer and creative technologist dedicated to pushing the boundaries
             of what's possible on the web.

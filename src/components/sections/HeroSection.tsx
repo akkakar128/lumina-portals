@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Scene3D from '../3d/Scene3D';
 import { ChevronDown } from 'lucide-react';
+import AnimatedTitle from '../AnimatedTitle';
 
 interface HeroSectionProps {
   name?: string;
@@ -74,10 +75,14 @@ const HeroSection = ({
             </span>
           </div>
 
-          {/* Main heading with glitch effect */}
-          <h1 className={`font-display text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter mb-6 ${isLoaded ? 'scroll-glitch-in' : 'scroll-hidden'}`} style={{ animationDelay: '200ms' }}>
-            <span className="text-neon">{name}</span>
-          </h1>
+          {/* Main heading with 3D animation */}
+          <div className={`mb-6 ${isLoaded ? 'scroll-fade-up' : 'scroll-hidden'}`} style={{ animationDelay: '200ms' }}>
+            <AnimatedTitle 
+              text={name} 
+              as="h1"
+              className="text-5xl md:text-7xl lg:text-8xl"
+            />
+          </div>
 
           {/* Subtitle with blur-in */}
           <p className={`font-display text-xl md:text-3xl lg:text-4xl font-light text-foreground/80 mb-4 ${isLoaded ? 'scroll-blur-in' : 'scroll-hidden'}`} style={{ animationDelay: '400ms' }}>
