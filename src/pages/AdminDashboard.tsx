@@ -14,14 +14,19 @@ import {
   Zap,
   Command,
   Home,
+  Link2,
+  Wrench,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import CommandPalette from '@/components/admin/CommandPalette';
 import UserManagementPanel from '@/components/admin/UserManagementPanel';
 import FeatureFlagsPanel from '@/components/admin/FeatureFlagsPanel';
 import AdminThemesPanel from '@/components/admin/ThemesPanel';
+import ProjectsPanel from '@/components/admin/ProjectsPanel';
+import SkillsPanel from '@/components/admin/SkillsPanel';
+import SocialLinksPanel from '@/components/admin/SocialLinksPanel';
 
-type AdminTab = 'overview' | 'portfolio' | 'profile' | 'users' | 'themes' | 'settings' | 'backup' | 'features';
+type AdminTab = 'overview' | 'portfolio' | 'skills' | 'social' | 'profile' | 'users' | 'themes' | 'settings' | 'backup' | 'features';
 
 const AdminDashboard = () => {
   const { user, isMasterAdmin, isPortfolioAdmin, signOut, roles } = useAuth();
@@ -58,6 +63,8 @@ const AdminDashboard = () => {
   const navItems = [
     { id: 'overview' as AdminTab, icon: LayoutDashboard, roles: ['master_admin', 'portfolio_admin', 'viewer'] },
     { id: 'portfolio' as AdminTab, icon: FolderOpen, roles: ['master_admin', 'portfolio_admin'] },
+    { id: 'skills' as AdminTab, icon: Wrench, roles: ['master_admin', 'portfolio_admin'] },
+    { id: 'social' as AdminTab, icon: Link2, roles: ['master_admin', 'portfolio_admin'] },
     { id: 'profile' as AdminTab, icon: User, roles: ['master_admin', 'portfolio_admin'] },
     { id: 'users' as AdminTab, icon: Users, roles: ['master_admin'] },
     { id: 'features' as AdminTab, icon: Zap, roles: ['master_admin'] },
@@ -71,7 +78,11 @@ const AdminDashboard = () => {
       case 'overview':
         return <OverviewPanel isMasterAdmin={isMasterAdmin} />;
       case 'portfolio':
-        return <PortfolioPanel />;
+        return <ProjectsPanel />;
+      case 'skills':
+        return <SkillsPanel />;
+      case 'social':
+        return <SocialLinksPanel />;
       case 'profile':
         return <ProfilePanel />;
       case 'users':
