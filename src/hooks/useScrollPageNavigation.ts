@@ -136,13 +136,13 @@ export const useScrollPageNavigation = (options: UseScrollPageNavigationOptions 
         if (direction === 'up') {
           // Coming from below - scroll to bottom of page
           const scrollHeight = document.documentElement.scrollHeight;
-          window.scrollTo({ top: scrollHeight, behavior: 'instant' });
+          window.scrollTo({ top: scrollHeight, behavior: 'smooth' });
         } else if (direction === 'down') {
           // Coming from above - scroll to top of page
-          window.scrollTo({ top: 0, behavior: 'instant' });
+          window.scrollTo({ top: 0, behavior: 'smooth' });
         } else {
           // Direct navigation (clicking nav links) - go to top
-          window.scrollTo({ top: 0, behavior: 'instant' });
+          window.scrollTo({ top: 0, behavior: 'smooth' });
         }
         pendingScrollDirection = null;
       }, 150);
