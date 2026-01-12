@@ -122,6 +122,13 @@ export const useScrollPageNavigation = (options: UseScrollPageNavigationOptions 
     };
   }, [enabled, scrollThreshold, debounceTime, navigateToPage]);
 
+  // Disable browser scroll restoration
+  useEffect(() => {
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+  }, []);
+
   // Scroll to appropriate position when page changes
   useEffect(() => {
     // Only run when pathname actually changes
@@ -130,22 +137,27 @@ export const useScrollPageNavigation = (options: UseScrollPageNavigationOptions 
 
     const direction = pendingScrollDirection;
     
-    // Use requestAnimationFrame to ensure DOM is ready
+    // Immediately set scroll position to prevent flash of wrong content
+    if (direction === 'down' || direction === null) {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+    
+    // Use requestAnimationFrame to ensure DOM is ready for final smooth scroll
     requestAnimationFrame(() => {
-      setTimeout(() => {
+      requestAnimationFrame(() => {
         if (direction === 'up') {
           // Coming from below - scroll to bottom of page
           const scrollHeight = document.documentElement.scrollHeight;
           window.scrollTo({ top: scrollHeight, behavior: 'smooth' });
         } else if (direction === 'down') {
-          // Coming from above - scroll to top of page
+          // Coming from above - already at top, just ensure smooth
           window.scrollTo({ top: 0, behavior: 'smooth' });
         } else {
           // Direct navigation (clicking nav links) - go to top
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }
         pendingScrollDirection = null;
-      }, 150);
+      });
     });
   }, [location.pathname]);
 
