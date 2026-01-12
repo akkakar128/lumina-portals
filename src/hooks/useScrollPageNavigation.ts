@@ -4,6 +4,9 @@ import { useNavigate, useLocation } from 'react-router-dom';
 // Page order for scroll-based navigation
 const PAGE_ORDER = ['/', '/about', '/projects', '/skills', '/contact'];
 
+// Store navigation direction globally to persist across re-renders
+let pendingScrollDirection: 'up' | 'down' | null = null;
+
 interface UseScrollPageNavigationOptions {
   scrollThreshold?: number;
   debounceTime?: number;
@@ -22,6 +25,7 @@ export const useScrollPageNavigation = (options: UseScrollPageNavigationOptions 
   const lastScrollTime = useRef(Date.now());
   const isNavigating = useRef(false);
   const [scrollDirection, setScrollDirection] = useState<'up' | 'down' | null>(null);
+  const prevPathname = useRef(location.pathname);
 
   const getCurrentPageIndex = useCallback(() => {
     return PAGE_ORDER.indexOf(location.pathname);
@@ -41,6 +45,7 @@ export const useScrollPageNavigation = (options: UseScrollPageNavigationOptions 
 
     if (targetIndex !== currentIndex) {
       isNavigating.current = true;
+      pendingScrollDirection = direction;
       setScrollDirection(direction);
       
       navigate(PAGE_ORDER[targetIndex]);
@@ -117,18 +122,32 @@ export const useScrollPageNavigation = (options: UseScrollPageNavigationOptions 
     };
   }, [enabled, scrollThreshold, debounceTime, navigateToPage]);
 
-  // Scroll to appropriate position when navigating
+  // Scroll to appropriate position when page changes
   useEffect(() => {
-    if (scrollDirection === 'up') {
-      // Coming from below - scroll to bottom of page
+    // Only run when pathname actually changes
+    if (prevPathname.current === location.pathname) return;
+    prevPathname.current = location.pathname;
+
+    const direction = pendingScrollDirection;
+    
+    // Use requestAnimationFrame to ensure DOM is ready
+    requestAnimationFrame(() => {
       setTimeout(() => {
-        window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' });
-      }, 50);
-    } else if (scrollDirection === 'down') {
-      // Coming from above - scroll to top of page
-      window.scrollTo({ top: 0, behavior: 'instant' });
-    }
-  }, [location.pathname, scrollDirection]);
+        if (direction === 'up') {
+          // Coming from below - scroll to bottom of page
+          const scrollHeight = document.documentElement.scrollHeight;
+          window.scrollTo({ top: scrollHeight, behavior: 'instant' });
+        } else if (direction === 'down') {
+          // Coming from above - scroll to top of page
+          window.scrollTo({ top: 0, behavior: 'instant' });
+        } else {
+          // Direct navigation (clicking nav links) - go to top
+          window.scrollTo({ top: 0, behavior: 'instant' });
+        }
+        pendingScrollDirection = null;
+      }, 150);
+    });
+  }, [location.pathname]);
 
   return {
     currentPage: location.pathname,
