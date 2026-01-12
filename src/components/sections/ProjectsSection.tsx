@@ -246,7 +246,7 @@ const ProjectsSection = () => {
               onClick={() => setShowAll(!showAll)}
               className="cyber-button inline-flex items-center gap-2 group"
             >
-              {showAll ? 'Show Less' : `View All Projects (${demoProjects.length - INITIAL_DISPLAY_COUNT} more)`}
+              {showAll ? 'Show Less' : 'View All Projects'}
               <ChevronRight className={`w-4 h-4 transition-transform duration-300 ${showAll ? 'rotate-90' : 'group-hover:translate-x-1'}`} />
             </button>
           </div>
