@@ -111,14 +111,35 @@ export const useScrollPageNavigation = (options: UseScrollPageNavigationOptions 
       }
     };
 
+    // Keyboard navigation
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't navigate if user is typing in an input
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      
+      const now = Date.now();
+      if (now - lastScrollTime.current < debounceTime) return;
+
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        lastScrollTime.current = now;
+        navigateToPage('down');
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        lastScrollTime.current = now;
+        navigateToPage('up');
+      }
+    };
+
     window.addEventListener('wheel', handleWheel, { passive: true });
     window.addEventListener('touchstart', handleTouchStart, { passive: true });
     window.addEventListener('touchend', handleTouchEnd, { passive: true });
+    window.addEventListener('keydown', handleKeyDown);
 
     return () => {
       window.removeEventListener('wheel', handleWheel);
       window.removeEventListener('touchstart', handleTouchStart);
       window.removeEventListener('touchend', handleTouchEnd);
+      window.removeEventListener('keydown', handleKeyDown);
     };
   }, [enabled, scrollThreshold, debounceTime, navigateToPage]);
 
