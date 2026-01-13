@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useEffect, useState, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import Navigation from './layout/Navigation';
 import { useScrollPageNavigation } from '@/hooks/useScrollPageNavigation';
@@ -20,37 +20,54 @@ const PageWrapper = ({
   className = ''
 }: PageWrapperProps) => {
   const location = useLocation();
-  const [isTransitioning, setIsTransitioning] = useState(false);
-  const [isVisible, setIsVisible] = useState(false);
-  const { currentIndex, totalPages, pageOrder, navigateToPage } = useScrollPageNavigation();
+  const [transitionState, setTransitionState] = useState<'entering' | 'visible' | 'exiting'>('visible');
+  const [transitionDirection, setTransitionDirection] = useState<'up' | 'down' | null>(null);
+  const { currentIndex, totalPages, pageOrder, navigateToPage, scrollDirection } = useScrollPageNavigation();
+  const prevPathname = useRef(location.pathname);
 
   // Handle page transition animations
   useEffect(() => {
-    setIsTransitioning(true);
-    setIsVisible(false);
-    
-    const showTimer = setTimeout(() => {
-      setIsVisible(true);
-      setIsTransitioning(false);
-    }, 100);
+    if (prevPathname.current !== location.pathname) {
+      setTransitionDirection(scrollDirection);
+      setTransitionState('entering');
+      
+      // Animate in after a brief delay
+      const enterTimer = setTimeout(() => {
+        setTransitionState('visible');
+      }, 50);
 
-    return () => clearTimeout(showTimer);
-  }, [location.pathname]);
+      prevPathname.current = location.pathname;
+      return () => clearTimeout(enterTimer);
+    }
+  }, [location.pathname, scrollDirection]);
 
   const canGoUp = currentIndex > 0;
   const canGoDown = currentIndex < totalPages - 1;
+
+  // Compute transform based on transition state and direction
+  const getTransitionClasses = () => {
+    if (transitionState === 'entering') {
+      // Start position: come from direction of navigation
+      if (transitionDirection === 'down') {
+        return 'opacity-0 translate-y-12 scale-[0.98]';
+      } else if (transitionDirection === 'up') {
+        return 'opacity-0 -translate-y-12 scale-[0.98]';
+      }
+      return 'opacity-0 translate-y-8 scale-[0.98]';
+    }
+    return 'opacity-100 translate-y-0 scale-100';
+  };
 
   return (
     <div className={`min-h-screen bg-background text-foreground overflow-x-hidden ${className}`}>
       {showNavigation && <Navigation />}
       
-      {/* Page content with transition */}
+      {/* Page content with smooth transition */}
       <main 
-        className={`transition-all duration-500 ease-out ${
-          isVisible 
-            ? 'opacity-100 translate-y-0' 
-            : 'opacity-0 translate-y-8'
-        }`}
+        className={`transition-all duration-700 ease-out ${getTransitionClasses()}`}
+        style={{ 
+          transitionTimingFunction: 'cubic-bezier(0.22, 1, 0.36, 1)' 
+        }}
       >
         {children}
       </main>
