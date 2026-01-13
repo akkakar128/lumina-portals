@@ -116,69 +116,82 @@ const FloatingGeometry = ({ isMobile = false }: FloatingGeometryProps) => {
   }, [isMobile]);
 
   useFrame(() => {
-    if (isMobile) return; // Skip camera movement on mobile
+    if (isMobile) return;
     
-    // Subtle camera movement following mouse
     camera.position.x += (mousePos.x * 0.5 - camera.position.x) * 0.02;
     camera.position.y += (mousePos.y * 0.3 - camera.position.y) * 0.02;
     camera.lookAt(0, 0, -5);
   });
 
-  // Responsive scale multiplier
-  const scale = isMobile ? 0.7 : 1;
-  const spread = isMobile ? 0.8 : 1;
+  // Responsive scale multiplier - slightly reduced for mobile but still visible
+  const scale = isMobile ? 0.8 : 1;
+  const spread = isMobile ? 0.85 : 1;
+  
+  // Fixed particle counts based on device (determined at mount, stable for component lifecycle)
+  const particleCount = isMobile ? 600 : 1500;
+  const secondaryParticleCount = isMobile ? 300 : 800;
 
   return (
     <>
-      {/* Main geometric shapes - reduced count on mobile */}
-      <FloatingShape position={[-4 * spread, 2 * spread, -5]} scale={1.5 * scale} color="#00ffff" speed={0.5} distort={0.4} geometry="icosahedron" />
-      <FloatingShape position={[4 * spread, -1 * spread, -3]} scale={1 * scale} color="#a855f7" speed={0.7} distort={0.3} geometry="octahedron" />
-      <FloatingShape position={[0, 3 * spread, -8]} scale={2 * scale} color="#ec4899" speed={0.3} distort={0.5} geometry="dodecahedron" />
+      {/* Main geometric shapes - all visible, just scaled on mobile */}
+      <FloatingShape position={[-3.5 * spread, 1.5 * spread, -5]} scale={1.4 * scale} color="#00ffff" speed={0.5} distort={0.4} geometry="icosahedron" />
+      <FloatingShape position={[3.5 * spread, -1 * spread, -3]} scale={1 * scale} color="#a855f7" speed={0.7} distort={0.3} geometry="octahedron" />
+      <FloatingShape position={[0, 2.5 * spread, -7]} scale={1.8 * scale} color="#ec4899" speed={0.3} distort={0.5} geometry="dodecahedron" />
+      <FloatingShape position={[-2.5 * spread, -2.5 * spread, -4]} scale={0.7 * scale} color="#22c55e" speed={0.9} distort={0.2} geometry="icosahedron" />
       
       {/* Additional shapes only on desktop */}
       {!isMobile && (
         <>
-          <FloatingShape position={[-3, -3, -4]} scale={0.8} color="#22c55e" speed={0.9} distort={0.2} geometry="icosahedron" />
           <FloatingShape position={[5, 2, -6]} scale={1.2} color="#f59e0b" speed={0.4} distort={0.35} geometry="torus" />
           <FloatingShape position={[-6, 0, -7]} scale={0.6} color="#06b6d4" speed={0.6} distort={0.25} geometry="octahedron" />
         </>
       )}
       
-      {/* Interactive particle systems - reduced count on mobile */}
-      <InteractiveParticles count={isMobile ? 400 : 1500} color="#00ffff" size={isMobile ? 0.03 : 0.02} spread={isMobile ? 15 : 20} />
-      {!isMobile && <InteractiveParticles count={800} color="#a855f7" size={0.015} spread={25} />}
+      {/* Interactive particle systems - use key to force fresh mount with correct count */}
+      <InteractiveParticles 
+        key={`particles-primary-${particleCount}`}
+        count={particleCount} 
+        color="#00ffff" 
+        size={isMobile ? 0.025 : 0.02} 
+        spread={isMobile ? 16 : 20} 
+      />
+      <InteractiveParticles 
+        key={`particles-secondary-${secondaryParticleCount}`}
+        count={secondaryParticleCount} 
+        color="#a855f7" 
+        size={isMobile ? 0.02 : 0.015} 
+        spread={isMobile ? 18 : 25} 
+      />
       
       {/* Glowing orbs with trails */}
       <GlowingOrbs />
       
-      {/* Neural network visualization - reduced on mobile */}
-      <NeuralNetwork nodeCount={isMobile ? 12 : 25} spread={isMobile ? 12 : 18} />
+      {/* Neural network visualization */}
+      <NeuralNetwork nodeCount={isMobile ? 15 : 25} spread={isMobile ? 14 : 18} />
       
       {/* Animated grid floor */}
       <GridFloor />
       
-      {/* Simplified lighting on mobile */}
-      <ambientLight intensity={isMobile ? 0.25 : 0.15} />
+      {/* Lighting - slightly brighter on mobile to compensate for fewer elements */}
+      <ambientLight intensity={isMobile ? 0.2 : 0.15} />
       <directionalLight position={[5, 5, 5]} intensity={0.4} color="#00ffff" />
-      {!isMobile && <directionalLight position={[-5, -5, 5]} intensity={0.3} color="#a855f7" />}
-      <pointLight position={[0, 0, 5]} intensity={isMobile ? 1 : 1.5} color="#00ffff" distance={25} decay={2} />
+      <directionalLight position={[-5, -5, 5]} intensity={isMobile ? 0.25 : 0.3} color="#a855f7" />
+      <pointLight position={[0, 0, 5]} intensity={isMobile ? 1.2 : 1.5} color="#00ffff" distance={25} decay={2} />
+      <pointLight position={[-5, 3, -5]} intensity={isMobile ? 0.5 : 0.8} color="#ec4899" distance={20} decay={2} />
+      
+      {/* Additional lights on desktop */}
       {!isMobile && (
         <>
-          <pointLight position={[-5, 3, -5]} intensity={0.8} color="#ec4899" distance={20} decay={2} />
           <pointLight position={[5, -3, -8]} intensity={0.6} color="#a855f7" distance={20} decay={2} />
+          <spotLight
+            position={[0, 10, 5]}
+            angle={0.3}
+            penumbra={0.8}
+            intensity={0.5}
+            color="#ffffff"
+            castShadow
+          />
         </>
-      )}
-      
-      {/* Spotlight for dramatic effect - desktop only */}
-      {!isMobile && (
-        <spotLight
-          position={[0, 10, 5]}
-          angle={0.3}
-          penumbra={0.8}
-          intensity={0.5}
-          color="#ffffff"
-          castShadow
-        />
       )}
     </>
   );
