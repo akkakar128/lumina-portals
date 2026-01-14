@@ -64,34 +64,35 @@ const InteractiveParticles = ({
     for (let i = 0; i < count; i++) {
       const i3 = i * 3;
       
-      // Add wave motion
-      positions[i3] += Math.sin(time + i * 0.01) * 0.002;
-      positions[i3 + 1] += Math.cos(time + i * 0.01) * 0.002;
+      // Gentler wave motion with reduced amplitude
+      positions[i3] += Math.sin(time * 0.5 + i * 0.005) * 0.0008;
+      positions[i3 + 1] += Math.cos(time * 0.5 + i * 0.005) * 0.0008;
       
-      // Mouse influence
+      // Smoother mouse influence with reduced force
       const dx = mousePosition.x * viewport.width * 0.5 - positions[i3];
       const dy = mousePosition.y * viewport.height * 0.5 - positions[i3 + 1];
       const distance = Math.sqrt(dx * dx + dy * dy);
       
       if (distance < 5) {
-        const force = (5 - distance) * 0.0005;
+        const force = (5 - distance) * 0.0002;
         positions[i3] -= dx * force;
         positions[i3 + 1] -= dy * force;
       }
       
-      // Add velocity
-      positions[i3] += velocities[i3];
-      positions[i3 + 1] += velocities[i3 + 1];
-      positions[i3 + 2] += velocities[i3 + 2];
+      // Slower velocity application
+      positions[i3] += velocities[i3] * 0.4;
+      positions[i3 + 1] += velocities[i3 + 1] * 0.4;
+      positions[i3 + 2] += velocities[i3 + 2] * 0.4;
       
-      // Boundary wrap
-      if (Math.abs(positions[i3]) > spread) positions[i3] *= -0.9;
-      if (Math.abs(positions[i3 + 1]) > spread) positions[i3 + 1] *= -0.9;
-      if (positions[i3 + 2] > 5 || positions[i3 + 2] < -spread) positions[i3 + 2] *= -0.9;
+      // Softer boundary wrap
+      if (Math.abs(positions[i3]) > spread) positions[i3] *= -0.95;
+      if (Math.abs(positions[i3 + 1]) > spread) positions[i3 + 1] *= -0.95;
+      if (positions[i3 + 2] > 5 || positions[i3 + 2] < -spread) positions[i3 + 2] *= -0.95;
     }
     
     pointsRef.current.geometry.attributes.position.needsUpdate = true;
-    pointsRef.current.rotation.y = time * 0.02;
+    // Slower rotation
+    pointsRef.current.rotation.y = time * 0.008;
   });
 
   return (

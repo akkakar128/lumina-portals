@@ -28,12 +28,14 @@ const FloatingShape = ({
 
   useFrame((state) => {
     if (meshRef.current) {
-      meshRef.current.rotation.x = state.clock.elapsedTime * 0.2 * speed;
-      meshRef.current.rotation.y = state.clock.elapsedTime * 0.3 * speed;
+      // Slower, smoother rotation with eased sine waves
+      const time = state.clock.elapsedTime;
+      meshRef.current.rotation.x += Math.sin(time * 0.3 * speed) * 0.002;
+      meshRef.current.rotation.y += Math.cos(time * 0.2 * speed) * 0.002;
       
-      // Pulse effect on hover
-      const targetScale = hovered ? scale * 1.2 : scale;
-      meshRef.current.scale.lerp(new Vector3(targetScale, targetScale, targetScale), 0.1);
+      // Smoother scale transition with gentler lerp factor
+      const targetScale = hovered ? scale * 1.15 : scale;
+      meshRef.current.scale.lerp(new Vector3(targetScale, targetScale, targetScale), 0.03);
     }
   });
 
@@ -51,7 +53,7 @@ const FloatingShape = ({
   };
 
   return (
-    <Float speed={speed * 2} rotationIntensity={0.5} floatIntensity={1}>
+    <Float speed={speed * 0.8} rotationIntensity={0.2} floatIntensity={0.4}>
       <mesh 
         ref={meshRef} 
         position={position} 
@@ -63,13 +65,13 @@ const FloatingShape = ({
         <MeshDistortMaterial
           color={color}
           emissive={color}
-          emissiveIntensity={hovered ? 0.5 : 0.2}
-          distort={distort}
-          speed={2}
-          roughness={0.2}
-          metalness={0.8}
+          emissiveIntensity={hovered ? 0.4 : 0.15}
+          distort={distort * 0.5}
+          speed={0.8}
+          roughness={0.3}
+          metalness={0.7}
           transparent
-          opacity={0.85}
+          opacity={0.9}
         />
       </mesh>
     </Float>
@@ -82,7 +84,8 @@ const GridFloor = () => {
   
   useFrame((state) => {
     if (gridRef.current) {
-      gridRef.current.position.z = (state.clock.elapsedTime * 0.5) % 2;
+      // Slower, smoother grid movement
+      gridRef.current.position.z = (state.clock.elapsedTime * 0.15) % 2;
     }
   });
 
@@ -118,8 +121,9 @@ const FloatingGeometry = ({ isMobile = false }: FloatingGeometryProps) => {
   useFrame(() => {
     if (isMobile) return;
     
-    camera.position.x += (mousePos.x * 0.5 - camera.position.x) * 0.02;
-    camera.position.y += (mousePos.y * 0.3 - camera.position.y) * 0.02;
+    // Smoother camera following with gentler lerp
+    camera.position.x += (mousePos.x * 0.3 - camera.position.x) * 0.008;
+    camera.position.y += (mousePos.y * 0.2 - camera.position.y) * 0.008;
     camera.lookAt(0, 0, -5);
   });
 

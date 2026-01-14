@@ -25,31 +25,32 @@ const GlowingOrb = ({
   useFrame((state) => {
     if (meshRef.current) {
       const time = state.clock.elapsedTime;
-      meshRef.current.position.y = position[1] + Math.sin(time * speed) * 0.5;
-      meshRef.current.position.x = position[0] + Math.cos(time * speed * 0.5) * 0.3;
+      // Smoother, slower movement with reduced amplitude
+      meshRef.current.position.y = position[1] + Math.sin(time * speed * 0.4) * 0.3;
+      meshRef.current.position.x = position[0] + Math.cos(time * speed * 0.2) * 0.2;
     }
   });
 
   return (
-    <Float speed={speed * 2} rotationIntensity={0.3} floatIntensity={0.8}>
+    <Float speed={speed * 0.6} rotationIntensity={0.15} floatIntensity={0.3}>
       <Trail
-        width={3}
-        length={5}
+        width={2}
+        length={4}
         color={color}
-        attenuation={(t) => t * t}
+        attenuation={(t) => t * t * t}
       >
         <mesh ref={meshRef} position={position} scale={scale}>
           <sphereGeometry args={[1, 32, 32]} />
           <MeshDistortMaterial
             color={color}
             emissive={color}
-            emissiveIntensity={emissiveIntensity}
-            distort={distort}
-            speed={3}
-            roughness={0}
-            metalness={0.5}
+            emissiveIntensity={emissiveIntensity * 0.7}
+            distort={distort * 0.4}
+            speed={1.2}
+            roughness={0.1}
+            metalness={0.4}
             transparent
-            opacity={0.9}
+            opacity={0.85}
           />
         </mesh>
       </Trail>
@@ -62,8 +63,9 @@ const EnergyRing = ({ radius = 5, color = '#00ffff', tubeRadius = 0.05 }) => {
   
   useFrame((state) => {
     if (ringRef.current) {
-      ringRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.2) * 0.3;
-      ringRef.current.rotation.z = state.clock.elapsedTime * 0.1;
+      // Smoother, slower ring rotation
+      ringRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.08) * 0.15;
+      ringRef.current.rotation.z = state.clock.elapsedTime * 0.03;
     }
   });
 

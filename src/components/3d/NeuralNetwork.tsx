@@ -46,8 +46,9 @@ const NeuralNetwork = ({ nodeCount = 30, spread = 15 }: NeuralNetworkProps) => {
 
   useFrame((state) => {
     if (groupRef.current) {
-      groupRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.1) * 0.2;
-      groupRef.current.rotation.x = Math.cos(state.clock.elapsedTime * 0.15) * 0.1;
+      // Slower, gentler rotation for smooth movement
+      groupRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.04) * 0.1;
+      groupRef.current.rotation.x = Math.cos(state.clock.elapsedTime * 0.06) * 0.05;
     }
   });
 

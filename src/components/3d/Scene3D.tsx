@@ -34,7 +34,7 @@ const Scene3D = () => {
             maxPolarAngle={Math.PI / 2}
             minPolarAngle={Math.PI / 2}
             autoRotate
-            autoRotateSpeed={isMobile ? 0.3 : 0.5}
+            autoRotateSpeed={isMobile ? 0.15 : 0.2}
           />
           <fog attach="fog" args={['#0a0a0f', isMobile ? 4 : 5, isMobile ? 25 : 30]} />
           <FloatingGeometry isMobile={isMobile} />
