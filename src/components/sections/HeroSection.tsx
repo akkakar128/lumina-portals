@@ -45,7 +45,7 @@ const HeroSection = ({
   return (
     <section
       ref={heroRef}
-      className="relative min-h-screen flex items-center justify-center overflow-hidden cyber-grid"
+      className="relative min-h-screen flex items-center justify-center overflow-hidden"
       style={{
         transform: 'translate(var(--mouse-x, 0), var(--mouse-y, 0))',
         transition: 'transform 0.3s ease-out',
