@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import Scene3D from '../3d/Scene3D';
 import { ChevronDown } from 'lucide-react';
 import AnimatedTitle from '../AnimatedTitle';
+import SocialLinks from '../SocialLinks';
 
 interface HeroSectionProps {
   name?: string;
@@ -105,6 +106,11 @@ const HeroSection = ({
             >
               Contact Me
             </Link>
+          </div>
+
+          {/* Social Links */}
+          <div className={`mt-10 ${isLoaded ? 'scroll-fade-up' : 'scroll-hidden'}`} style={{ animationDelay: '1000ms' }}>
+            <SocialLinks iconSize="md" variant="glow" />
           </div>
         </div>
       </div>
